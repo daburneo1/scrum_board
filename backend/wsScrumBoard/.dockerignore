@@ -1,0 +1,45 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+**/TestResults/
+**/coverage/
+**/coverage.*
+
+# Source-control metadata
+.git/
+.gitignore
+.gitattributes
+
+# IDE and editor files
+.idea/
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Local tools and agent configuration
+.config/
+.agents/
+.codex/
+
+# Local configuration and secrets
+**/appsettings.Development.json
+**/appsettings.Local.json
+.env
+.env.*
+!.env.example
+**/secrets.json
+
+# Docker and miscellaneous files not needed by the build
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+docker-compose*.yaml
+README*
+LICENSE*
+*.md
+*.log
