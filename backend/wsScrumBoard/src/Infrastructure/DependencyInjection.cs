@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
 
         services
             .AddOptions<JwtOptions>()

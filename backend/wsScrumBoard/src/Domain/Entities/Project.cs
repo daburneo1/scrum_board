@@ -11,7 +11,7 @@ public sealed class Project : Entity
 
     public Project(
         string name,
-        string description,
+        string? description,
         DateOnly startDate,
         DateOnly expectedEndDate,
         ProjectStatus status = ProjectStatus.Planned)
@@ -49,4 +49,32 @@ public sealed class Project : Entity
 
     public ICollection<BoardColumn> Columns { get; private set; } =
         new List<BoardColumn>();
+
+    public void Update(
+        string name,
+        string? description,
+        DateOnly startDate,
+        DateOnly expectedEndDate,
+        ProjectStatus status)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException(
+                "El nombre del proyecto es obligatorio.",
+                nameof(name));
+        }
+
+        if (expectedEndDate < startDate)
+        {
+            throw new ArgumentException(
+                "La fecha final no puede ser menor que la fecha de inicio.",
+                nameof(expectedEndDate));
+        }
+
+        Name = name.Trim();
+        Description = description?.Trim() ?? string.Empty;
+        StartDate = startDate;
+        ExpectedEndDate = expectedEndDate;
+        Status = status;
+    }
 }

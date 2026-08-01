@@ -1,26 +1,20 @@
 ﻿using Application.Common.Models;
+using Application.Contracts.Projects;
 using Domain.Entities;
 
 namespace Application.Ports.Persistence;
 
 public interface IProjectRepository
 {
-    Task<PagedResult<Project>> SearchAsync(
-        string? name,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken);
+    Task<PagedResult<ProjectDto>> GetPagedAsync(
+        ProjectQueryParameters parameters,
+        CancellationToken cancellationToken = default);
 
     Task<Project?> GetByIdAsync(
         Guid id,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
-    Task AddAsync(
-        Project project,
-        CancellationToken cancellationToken);
+    void Add(Project project);
 
     void Remove(Project project);
-
-    Task SaveChangesAsync(
-        CancellationToken cancellationToken);
 }
