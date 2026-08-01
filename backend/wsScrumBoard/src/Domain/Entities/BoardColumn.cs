@@ -13,12 +13,17 @@ public sealed class BoardColumn : Entity
         Guid projectId,
         int sortOrder)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException(
+                "El nombre de la columna es obligatorio.",
+                nameof(name));
+        }
 
         if (projectId == Guid.Empty)
         {
             throw new ArgumentException(
-                "Se requiere un id de proyecto válido",
+                "Se requiere un identificador de proyecto válido.",
                 nameof(projectId));
         }
 
@@ -26,7 +31,7 @@ public sealed class BoardColumn : Entity
         {
             throw new ArgumentOutOfRangeException(
                 nameof(sortOrder),
-                "El órden no puede ser negativo.");
+                "El orden no puede ser negativo.");
         }
 
         Name = name.Trim();

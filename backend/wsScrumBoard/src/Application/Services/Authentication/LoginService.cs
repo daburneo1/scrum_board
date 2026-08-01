@@ -29,7 +29,7 @@ public sealed class LoginService
             string.IsNullOrWhiteSpace(request.Password))
         {
             throw new ValidationException(
-                "Email and password are required.");
+                "El correo electrónico y la contraseña son obligatorios.");
         }
 
         var normalizedEmail = request.Email
@@ -47,7 +47,7 @@ public sealed class LoginService
                 request.Password))
         {
             throw new UnauthorizedException(
-                "Invalid email or password.");
+                "El correo electrónico o la contraseña son incorrectos.");
         }
 
         var expiresAtUtc = DateTimeOffset.UtcNow.AddMinutes(60);

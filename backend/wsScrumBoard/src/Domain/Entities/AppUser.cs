@@ -13,9 +13,26 @@ public sealed class AppUser : Entity
         string email,
         string passwordHash)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        ArgumentException.ThrowIfNullOrWhiteSpace(email);
-        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException(
+                "El nombre del usuario es obligatorio.",
+                nameof(name));
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new ArgumentException(
+                "El correo electrónico es obligatorio.",
+                nameof(email));
+        }
+
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new ArgumentException(
+                "El hash de la contraseña es obligatorio.",
+                nameof(passwordHash));
+        }
 
         Name = name.Trim();
         Email = email.Trim();

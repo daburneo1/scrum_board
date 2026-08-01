@@ -16,12 +16,17 @@ public sealed class Project : Entity
         DateOnly expectedEndDate,
         ProjectStatus status = ProjectStatus.Planned)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException(
+                "El nombre del proyecto es obligatorio.",
+                nameof(name));
+        }
 
         if (expectedEndDate < startDate)
         {
             throw new ArgumentException(
-                "La fecha final no puede ser menor a la fecha de inicio",
+                "La fecha final no puede ser menor que la fecha de inicio.",
                 nameof(expectedEndDate));
         }
 

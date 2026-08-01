@@ -12,7 +12,12 @@ internal sealed class PasswordService : IPasswordService
         AppUser user,
         string password)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            throw new ArgumentException(
+                "La contraseña es obligatoria.",
+                nameof(password));
+        }
 
         return _passwordHasher.HashPassword(user, password);
     }

@@ -18,7 +18,12 @@ public sealed class BoardTask : Entity
         DateTimeOffset createdAtUtc,
         Guid? assignedUserId = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException(
+                "El título de la tarea es obligatorio.",
+                nameof(title));
+        }
 
         if (columnId == Guid.Empty)
         {

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 
 namespace Infrastructure;
 
@@ -18,10 +19,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString =
-            configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException(
-                "The PostgreSQL connection string was not configured.");
+        var connectionString = BuildPostgresConnectionString();
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -40,20 +38,20 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(JwtOptions.SectionName))
             .Validate(
                 options => !string.IsNullOrWhiteSpace(options.Issuer),
-                "JWT issuer is required.")
+                "El emisor del JWT es obligatorio.")
             .Validate(
                 options => !string.IsNullOrWhiteSpace(options.Audience),
-                "JWT audience is required.")
+                "La audiencia del JWT es obligatoria.")
             .Validate(
                 options => options.Key.Length >= 32,
-                "JWT key must contain at least 32 characters.")
+                "La clave JWT debe contener al menos 32 caracteres.")
             .ValidateOnStart();
 
         var jwtOptions = configuration
             .GetSection(JwtOptions.SectionName)
             .Get<JwtOptions>()
             ?? throw new InvalidOperationException(
-                "JWT configuration was not found.");
+                "No se encontró la configuración de JWT.");
 
         services
             .AddAuthentication(
@@ -83,5 +81,36 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         return services;
+    }
+
+    private static string BuildPostgresConnectionString()
+    {
+        var portValue = GetRequiredEnvironmentVariable("POSTGRES_PORT");
+
+        if (!int.TryParse(portValue, out var port) || port is < 1 or > 65535)
+        {
+            throw new InvalidOperationException(
+                "La variable de entorno POSTGRES_PORT debe contener un puerto TCP válido.");
+        }
+
+        return new NpgsqlConnectionStringBuilder
+        {
+            Host = GetRequiredEnvironmentVariable("POSTGRES_HOST"),
+            Port = port,
+            Database = GetRequiredEnvironmentVariable("POSTGRES_DB"),
+            Username = GetRequiredEnvironmentVariable("POSTGRES_USER"),
+            Password = GetRequiredEnvironmentVariable("POSTGRES_PASSWORD"),
+            IncludeErrorDetail = true
+        }.ConnectionString;
+    }
+
+    private static string GetRequiredEnvironmentVariable(string name)
+    {
+        var value = Environment.GetEnvironmentVariable(name);
+
+        return !string.IsNullOrWhiteSpace(value)
+            ? value
+            : throw new InvalidOperationException(
+                $"La variable de entorno {name} no está configurada.");
     }
 }
