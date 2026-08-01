@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -39,5 +40,23 @@ internal sealed class AppUserConfiguration :
         builder.HasIndex(user => user.NormalizedEmail)
             .IsUnique()
             .HasDatabaseName("ux_users_normalized_email");
+        
+        builder.HasData(
+            new
+            {
+                Id = SeedData.AdminUserId,
+                Name = "Administrator",
+                Email = "admin@scrumboard.local",
+                NormalizedEmail = "ADMIN@SCRUMBOARD.LOCAL",
+                PasswordHash = "AQAAAAIAAYagAAAAEOjwVSt9xPqj1MoHEqB6JWKKgecbqXFMJbIwl60PACRF1QcbrpDD+TZqUYW6erV45Q=="
+            },
+            new
+            {
+                Id = SeedData.ProjectUserId,
+                Name = "Project User",
+                Email = "user@scrumboard.local",
+                NormalizedEmail = "USER@SCRUMBOARD.LOCAL",
+                PasswordHash = "AQAAAAIAAYagAAAAEMS79DE2c4ZV0b3b9Ts8n5GN5mgPzcZ/dUj3jacSAZBO7p3ezMudh+CMtBiQuSOTqg=="
+            });
     }
 }

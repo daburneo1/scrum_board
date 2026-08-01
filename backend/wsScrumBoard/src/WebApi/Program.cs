@@ -20,12 +20,7 @@ builder.Services.AddControllers();
 
 var configuration = builder.Configuration;
 
-var connectionString =
-    configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException(
-        "The PostgreSQL connection string was not configured.");
-
-builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddInfrastructure(configuration);
 
 builder.Services
     .AddHealthChecks()

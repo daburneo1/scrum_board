@@ -60,6 +60,24 @@ namespace Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ux_users_normalized_email");
 
                     b.ToTable("users", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000001"),
+                            Email = "admin@scrumboard.local",
+                            Name = "Administrator",
+                            NormalizedEmail = "ADMIN@SCRUMBOARD.LOCAL",
+                            PasswordHash = "AQAAAAIAAYagAAAAEOjwVSt9xPqj1MoHEqB6JWKKgecbqXFMJbIwl60PACRF1QcbrpDD+TZqUYW6erV45Q=="
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000002"),
+                            Email = "user@scrumboard.local",
+                            Name = "Project User",
+                            NormalizedEmail = "USER@SCRUMBOARD.LOCAL",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMS79DE2c4ZV0b3b9Ts8n5GN5mgPzcZ/dUj3jacSAZBO7p3ezMudh+CMtBiQuSOTqg=="
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.BoardColumn", b =>
