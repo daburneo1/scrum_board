@@ -129,6 +129,66 @@ internal sealed class BoardRepository : IBoardRepository
 
         return checked(maximumOrder + OrderSpacing);
     }
+    
+    public async Task<IReadOnlyCollection<BoardTask>>
+        GetTasksForColumnsAsync(
+            Guid projectId,
+            IReadOnlyCollection<Guid> columnIds,
+            CancellationToken cancellationToken = default)
+    {
+        var distinctColumnIds = columnIds
+            .Distinct()
+            .ToArray();
+
+        return await _dbContext.BoardTasks
+            .Where(task =>
+                distinctColumnIds.Contains(task.ColumnId) &&
+                task.Column.ProjectId == projectId)
+            .OrderBy(task => task.ColumnId)
+            .ThenBy(task => task.SortOrder)
+            .ThenBy(task => task.Id)
+            .ToListAsync(cancellationToken);
+    }
+    
+    public async Task<IReadOnlyCollection<BoardColumnDto>>
+        GetColumnDtosAsync(
+            Guid projectId,
+            IReadOnlyCollection<Guid> columnIds,
+            CancellationToken cancellationToken = default)
+    {
+        var distinctColumnIds = columnIds
+            .Distinct()
+            .ToArray();
+
+        return await _dbContext.BoardColumns
+            .AsNoTracking()
+            .Where(column =>
+                column.ProjectId == projectId &&
+                distinctColumnIds.Contains(column.Id))
+            .OrderBy(column => column.SortOrder)
+            .ThenBy(column => column.Id)
+            .Select(column => new BoardColumnDto(
+                column.Id,
+                column.Name,
+                column.SortOrder,
+                column.Tasks
+                    .OrderBy(task => task.SortOrder)
+                    .ThenBy(task => task.Id)
+                    .Select(task => new BoardTaskDto(
+                        task.Id,
+                        task.Title,
+                        task.Description,
+                        task.Priority,
+                        task.AssignedUserId,
+                        task.AssignedUser != null
+                            ? task.AssignedUser.Name
+                            : null,
+                        task.ColumnId,
+                        task.SortOrder,
+                        task.CreatedAtUtc))
+                    .ToList()))
+            .ToListAsync(cancellationToken);
+    }
 
     public void AddColumn(BoardColumn column)
     {

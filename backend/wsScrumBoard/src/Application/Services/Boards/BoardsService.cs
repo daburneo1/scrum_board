@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Contracts.Boards;
 using Application.Ports.Persistence;
+using Application.Tasks.Ordering;
 using Domain.Entities;
 
 namespace Application.Services.Boards;
@@ -18,12 +19,14 @@ public sealed class BoardService
         IBoardRepository boardRepository,
         IProjectRepository projectRepository,
         IUserRepository userRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        TaskOrderCalculator taskOrderCalculator)
     {
         _boardRepository = boardRepository;
         _projectRepository = projectRepository;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
+        _taskOrderCalculator = taskOrderCalculator;
     }
 
     public async Task<ProjectBoardDto> GetBoardAsync(
@@ -31,10 +34,10 @@ public sealed class BoardService
         CancellationToken cancellationToken = default)
     {
         return await _boardRepository.GetBoardAsync(
-            projectId,
-            cancellationToken)
-            ?? throw new NotFoundException(
-                "The requested project was not found.");
+                   projectId,
+                   cancellationToken)
+               ?? throw new NotFoundException(
+                   "The requested project was not found.");
     }
 
     public Task<IReadOnlyCollection<UserOptionDto>>
@@ -112,8 +115,8 @@ public sealed class BoardService
             cancellationToken);
 
         if (await _boardRepository.ColumnHasTasksAsync(
-            columnId,
-            cancellationToken))
+                columnId,
+                cancellationToken))
         {
             throw new ConflictException(
                 "No se puede eliminar una columna que contiene tareas.");
@@ -147,9 +150,9 @@ public sealed class BoardService
         }
 
         var columns = (
-            await _boardRepository.GetColumnsAsync(
-                projectId,
-                cancellationToken))
+                await _boardRepository.GetColumnsAsync(
+                    projectId,
+                    cancellationToken))
             .ToList();
 
         if (columns.Count == 0)
@@ -169,8 +172,7 @@ public sealed class BoardService
                 "La solicitud debe contener todas las columnas del proyecto exactamente una vez.");
         }
 
-        var columnsById = columns.ToDictionary(
-            column => column.Id);
+        var columnsById = columns.ToDictionary(column => column.Id);
 
         for (var index = 0; index < orderedIds.Count; index++)
         {
@@ -284,8 +286,8 @@ public sealed class BoardService
         }
 
         if (!await _userRepository.ExistsAsync(
-            assignedUserId.Value,
-            cancellationToken))
+                assignedUserId.Value,
+                cancellationToken))
         {
             throw new ValidationException(
                 "El usuario seleccionado no existe.");
@@ -309,11 +311,11 @@ public sealed class BoardService
         CancellationToken cancellationToken)
     {
         return await _boardRepository.GetColumnAsync(
-            projectId,
-            columnId,
-            cancellationToken)
-            ?? throw new NotFoundException(
-                "No se encontró la columna solicitada");
+                   projectId,
+                   columnId,
+                   cancellationToken)
+               ?? throw new NotFoundException(
+                   "No se encontró la columna solicitada");
     }
 
     private async Task<BoardTask> GetTaskOrThrowAsync(
@@ -322,11 +324,11 @@ public sealed class BoardService
         CancellationToken cancellationToken)
     {
         return await _boardRepository.GetTaskAsync(
-            projectId,
-            taskId,
-            cancellationToken)
-            ?? throw new NotFoundException(
-                "No se encontró la tarea.");
+                   projectId,
+                   taskId,
+                   cancellationToken)
+               ?? throw new NotFoundException(
+                   "No se encontró la tarea.");
     }
 
     private async Task<BoardTaskDto> GetTaskDtoAsync(
@@ -381,5 +383,117 @@ public sealed class BoardService
             throw new ValidationException(
                 "El título de la tarea no puede exceder los 250 caracteres.");
         }
+    }
+
+    private readonly TaskOrderCalculator _taskOrderCalculator;
+
+    public async Task<MoveTaskResponse> MoveTaskAsync(
+        Guid projectId,
+        Guid taskId,
+        MoveTaskRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.TargetColumnId == Guid.Empty)
+        {
+            throw new ValidationException(
+                "A valid target column is required.");
+        }
+
+        if (request.TargetIndex < 0)
+        {
+            throw new ValidationException(
+                "The target index cannot be negative.");
+        }
+
+        var task = await GetTaskOrThrowAsync(
+            projectId,
+            taskId,
+            cancellationToken);
+
+        var sourceColumnId = task.ColumnId;
+
+        _ = await GetColumnOrThrowAsync(
+            projectId,
+            request.TargetColumnId,
+            cancellationToken);
+
+        var affectedColumnIds =
+            sourceColumnId == request.TargetColumnId
+                ? new[]
+                {
+                    sourceColumnId
+                }
+                : new[]
+                {
+                    sourceColumnId,
+                    request.TargetColumnId
+                };
+
+        var affectedTasks =
+            await _boardRepository.GetTasksForColumnsAsync(
+                projectId,
+                affectedColumnIds,
+                cancellationToken);
+
+        var sourceTaskIds = affectedTasks
+            .Where(item =>
+                item.ColumnId == sourceColumnId)
+            .OrderBy(item => item.SortOrder)
+            .ThenBy(item => item.Id)
+            .Select(item => item.Id)
+            .ToList();
+
+        var targetTaskIds =
+            sourceColumnId == request.TargetColumnId
+                ? sourceTaskIds
+                : affectedTasks
+                    .Where(item =>
+                        item.ColumnId ==
+                        request.TargetColumnId)
+                    .OrderBy(item => item.SortOrder)
+                    .ThenBy(item => item.Id)
+                    .Select(item => item.Id)
+                    .ToList();
+
+        var plan = _taskOrderCalculator.Calculate(
+            taskId,
+            sourceColumnId,
+            request.TargetColumnId,
+            request.TargetIndex,
+            sourceTaskIds,
+            targetTaskIds);
+
+        var tasksById = affectedTasks
+            .ToDictionary(item => item.Id);
+
+        foreach (var change in plan.Changes)
+        {
+            if (!tasksById.TryGetValue(
+                    change.TaskId,
+                    out var affectedTask))
+            {
+                throw new InvalidOperationException(
+                    "The task ordering plan contains an unknown task.");
+            }
+
+            affectedTask.ChangePosition(
+                change.ColumnId,
+                change.SortOrder);
+        }
+
+        await _unitOfWork.SaveChangesAsync(
+            cancellationToken);
+
+        var affectedColumns =
+            await _boardRepository.GetColumnDtosAsync(
+                projectId,
+                affectedColumnIds,
+                cancellationToken);
+
+        return new MoveTaskResponse(
+            taskId,
+            sourceColumnId,
+            request.TargetColumnId,
+            affectedColumns);
     }
 }

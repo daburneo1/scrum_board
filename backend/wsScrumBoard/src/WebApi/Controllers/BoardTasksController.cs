@@ -8,22 +8,15 @@ namespace WebApi.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/projects/{projectId:guid}/tasks")]
-public sealed class BoardTasksController : ControllerBase
+public sealed class BoardTasksController(BoardService boardService) : ControllerBase
 {
-    private readonly BoardService _boardService;
-
-    public BoardTasksController(BoardService boardService)
-    {
-        _boardService = boardService;
-    }
-
     [HttpPost]
     public Task<BoardTaskDto> Create(
         Guid projectId,
         CreateBoardTaskRequest request,
         CancellationToken cancellationToken)
     {
-        return _boardService.CreateTaskAsync(
+        return boardService.CreateTaskAsync(
             projectId,
             request,
             cancellationToken);
@@ -36,7 +29,7 @@ public sealed class BoardTasksController : ControllerBase
         UpdateBoardTaskRequest request,
         CancellationToken cancellationToken)
     {
-        return _boardService.UpdateTaskAsync(
+        return boardService.UpdateTaskAsync(
             projectId,
             taskId,
             request,
@@ -49,11 +42,25 @@ public sealed class BoardTasksController : ControllerBase
         Guid taskId,
         CancellationToken cancellationToken)
     {
-        await _boardService.DeleteTaskAsync(
+        await boardService.DeleteTaskAsync(
             projectId,
             taskId,
             cancellationToken);
 
         return NoContent();
+    }
+    
+    [HttpPut("{taskId:guid}/position")]
+    public Task<MoveTaskResponse> Move(
+        Guid projectId,
+        Guid taskId,
+        MoveTaskRequest request,
+        CancellationToken cancellationToken)
+    {
+        return boardService.MoveTaskAsync(
+            projectId,
+            taskId,
+            request,
+            cancellationToken);
     }
 }

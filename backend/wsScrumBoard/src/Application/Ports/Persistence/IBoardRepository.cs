@@ -34,6 +34,18 @@ public interface IBoardRepository
     Task<int> GetNextTaskSortOrderAsync(
         Guid columnId,
         CancellationToken cancellationToken = default);
+    
+    Task<IReadOnlyCollection<BoardTask>>
+        GetTasksForColumnsAsync(
+            Guid projectId,
+            IReadOnlyCollection<Guid> columnIds,
+            CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<BoardColumnDto>>
+        GetColumnDtosAsync(
+            Guid projectId,
+            IReadOnlyCollection<Guid> columnIds,
+            CancellationToken cancellationToken = default);
 
     void AddColumn(BoardColumn column);
 

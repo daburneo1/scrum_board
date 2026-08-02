@@ -91,4 +91,26 @@ public sealed class BoardTask : Entity
 
         SortOrder = sortOrder;
     }
+    
+    public void ChangePosition(
+        Guid columnId,
+        int sortOrder)
+    {
+        if (columnId == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "Se requiere un identificador de columna válido.",
+                nameof(columnId));
+        }
+
+        if (sortOrder < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(sortOrder),
+                "El orden de clasificación no puede ser negativo.");
+        }
+
+        ColumnId = columnId;
+        SortOrder = sortOrder;
+    }
 }
