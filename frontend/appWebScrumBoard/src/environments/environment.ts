@@ -4,8 +4,8 @@
 
 export const environment = {
     production: false,
-    apiBaseUrl: '/api',
-    realtimeBaseUrl: '/hubs'
+    apiBaseUrl: 'http://localhost:8080/api',
+    realtimeBaseUrl: 'http://localhost:8080/hubs'
 };
 
 /*
@@ -16,3 +16,4 @@ export const environment = {
  * on performance if an error is thrown.
  */
 // import 'zone.js/plugins/zone-error';  // Included with Angular CLI.
+

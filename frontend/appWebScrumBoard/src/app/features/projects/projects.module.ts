@@ -21,7 +21,7 @@ import {ProjectListComponent} from "./project-list/project-list.component";
 
 @NgModule({
     declarations: [
-
+        ProjectListComponent
     ],
     imports: [
         CommonModule,
@@ -37,8 +37,7 @@ import {ProjectListComponent} from "./project-list/project-list.component";
         ToolbarModule,
         ConfirmDialogModule,
         ToastModule,
-        TagModule,
-        ProjectListComponent
+        TagModule
     ],
     providers: [
         ConfirmationService,

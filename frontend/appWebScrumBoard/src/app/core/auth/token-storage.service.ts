@@ -40,11 +40,11 @@ export class TokenStorageService {
     isAuthenticated(): boolean {
         const session = this.getSession();
 
-        if (!session?.accessToken || !session.expiresAtUtc) {
+        if (!session?.accessToken || !session.expiresAt) {
             return false;
         }
 
-        const expiration = Date.parse(session.expiresAtUtc);
+        const expiration = Date.parse(session.expiresAt);
 
         if (!Number.isFinite(expiration) || expiration <= Date.now()) {
             this.clearSession();

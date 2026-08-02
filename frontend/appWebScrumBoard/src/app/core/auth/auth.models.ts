@@ -12,6 +12,6 @@ export interface AuthenticatedUser {
 export interface LoginResponse {
     accessToken: string;
     tokenType: string;
-    expiresAtUtc: string;
+    expiresAt: string;
     user: AuthenticatedUser;
 }
