@@ -80,4 +80,15 @@ internal sealed class ProjectRepository :
     {
         _dbContext.Projects.Remove(project);
     }
+    
+    public Task<bool> ExistsAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Projects
+            .AsNoTracking()
+            .AnyAsync(
+                project => project.Id == projectId,
+                cancellationToken);
+    }
 }

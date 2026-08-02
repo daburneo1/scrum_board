@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure;
@@ -78,6 +79,31 @@ public static class DependencyInjection
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromSeconds(30)
                     };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken =
+                            context.Request.Query["access_token"];
+
+                        var requestPath =
+                            context.HttpContext.Request.Path;
+
+                        var isBoardHubRequest =
+                            requestPath.StartsWithSegments(
+                                "/hubs/board");
+
+                        if (
+                            !StringValues.IsNullOrEmpty(accessToken) &&
+                            isBoardHubRequest
+                        )
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
         services.AddAuthorization();

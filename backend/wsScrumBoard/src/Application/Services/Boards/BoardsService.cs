@@ -1,39 +1,27 @@
 ﻿using Application.Common.Exceptions;
 using Application.Contracts.Boards;
 using Application.Ports.Persistence;
+using Application.RealTime.Boards;
 using Application.Tasks.Ordering;
 using Domain.Entities;
 
 namespace Application.Services.Boards;
 
-public sealed class BoardService
+public sealed class BoardService(
+    IBoardRepository boardRepository,
+    IProjectRepository projectRepository,
+    IUserRepository userRepository,
+    IUnitOfWork unitOfWork,
+    TaskOrderCalculator taskOrderCalculator,
+    IBoardRealtimeNotifier realtimeNotifier)
 {
     private const int OrderSpacing = 1000;
-
-    private readonly IBoardRepository _boardRepository;
-    private readonly IProjectRepository _projectRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public BoardService(
-        IBoardRepository boardRepository,
-        IProjectRepository projectRepository,
-        IUserRepository userRepository,
-        IUnitOfWork unitOfWork,
-        TaskOrderCalculator taskOrderCalculator)
-    {
-        _boardRepository = boardRepository;
-        _projectRepository = projectRepository;
-        _userRepository = userRepository;
-        _unitOfWork = unitOfWork;
-        _taskOrderCalculator = taskOrderCalculator;
-    }
 
     public async Task<ProjectBoardDto> GetBoardAsync(
         Guid projectId,
         CancellationToken cancellationToken = default)
     {
-        return await _boardRepository.GetBoardAsync(
+        return await boardRepository.GetBoardAsync(
                    projectId,
                    cancellationToken)
                ?? throw new NotFoundException(
@@ -44,7 +32,7 @@ public sealed class BoardService
         GetUsersAsync(
             CancellationToken cancellationToken = default)
     {
-        return _userRepository.GetOptionsAsync(
+        return userRepository.GetOptionsAsync(
             cancellationToken);
     }
 
@@ -55,7 +43,7 @@ public sealed class BoardService
     {
         ValidateColumnName(request.Name);
 
-        var project = await _projectRepository.GetByIdAsync(
+        var project = await projectRepository.GetByIdAsync(
             projectId,
             cancellationToken);
 
@@ -66,7 +54,7 @@ public sealed class BoardService
         }
 
         var sortOrder =
-            await _boardRepository.GetNextColumnSortOrderAsync(
+            await boardRepository.GetNextColumnSortOrderAsync(
                 projectId,
                 cancellationToken);
 
@@ -75,9 +63,9 @@ public sealed class BoardService
             projectId,
             sortOrder);
 
-        _boardRepository.AddColumn(column);
+        boardRepository.AddColumn(column);
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
 
         return MapColumn(column);
@@ -98,7 +86,7 @@ public sealed class BoardService
 
         column.Rename(request.Name);
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
 
         return MapColumn(column);
@@ -114,7 +102,7 @@ public sealed class BoardService
             columnId,
             cancellationToken);
 
-        if (await _boardRepository.ColumnHasTasksAsync(
+        if (await boardRepository.ColumnHasTasksAsync(
                 columnId,
                 cancellationToken))
         {
@@ -122,9 +110,9 @@ public sealed class BoardService
                 "No se puede eliminar una columna que contiene tareas.");
         }
 
-        _boardRepository.RemoveColumn(column);
+        boardRepository.RemoveColumn(column);
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
     }
 
@@ -150,7 +138,7 @@ public sealed class BoardService
         }
 
         var columns = (
-                await _boardRepository.GetColumnsAsync(
+                await boardRepository.GetColumnsAsync(
                     projectId,
                     cancellationToken))
             .ToList();
@@ -183,7 +171,7 @@ public sealed class BoardService
                 .ChangeSortOrder(newOrder);
         }
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
     }
 
@@ -204,7 +192,7 @@ public sealed class BoardService
             cancellationToken);
 
         var sortOrder =
-            await _boardRepository.GetNextTaskSortOrderAsync(
+            await boardRepository.GetNextTaskSortOrderAsync(
                 column.Id,
                 cancellationToken);
 
@@ -217,15 +205,22 @@ public sealed class BoardService
             DateTimeOffset.UtcNow,
             request.AssignedUserId);
 
-        _boardRepository.AddTask(task);
+        boardRepository.AddTask(task);
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
 
-        return await GetTaskDtoAsync(
+        var createdTask = await GetTaskDtoAsync(
             projectId,
             task.Id,
             cancellationToken);
+
+        await NotifyTaskChangeAsync(
+            projectId,
+            task.Id,
+            BoardChangeType.TaskCreated);
+
+        return createdTask;
     }
 
     public async Task<BoardTaskDto> UpdateTaskAsync(
@@ -251,13 +246,20 @@ public sealed class BoardService
             request.Priority,
             request.AssignedUserId);
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
 
-        return await GetTaskDtoAsync(
+        var updatedTask = await GetTaskDtoAsync(
             projectId,
             task.Id,
             cancellationToken);
+
+        await NotifyTaskChangeAsync(
+            projectId,
+            task.Id,
+            BoardChangeType.TaskUpdated);
+
+        return updatedTask;
     }
 
     public async Task DeleteTaskAsync(
@@ -270,10 +272,15 @@ public sealed class BoardService
             taskId,
             cancellationToken);
 
-        _boardRepository.RemoveTask(task);
+        boardRepository.RemoveTask(task);
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
+
+        await NotifyTaskChangeAsync(
+            projectId,
+            taskId,
+            BoardChangeType.TaskDeleted);
     }
 
     private async Task ValidateAssignedUserAsync(
@@ -285,7 +292,7 @@ public sealed class BoardService
             return;
         }
 
-        if (!await _userRepository.ExistsAsync(
+        if (!await userRepository.ExistsAsync(
                 assignedUserId.Value,
                 cancellationToken))
         {
@@ -310,7 +317,7 @@ public sealed class BoardService
         Guid columnId,
         CancellationToken cancellationToken)
     {
-        return await _boardRepository.GetColumnAsync(
+        return await boardRepository.GetColumnAsync(
                    projectId,
                    columnId,
                    cancellationToken)
@@ -323,7 +330,7 @@ public sealed class BoardService
         Guid taskId,
         CancellationToken cancellationToken)
     {
-        return await _boardRepository.GetTaskAsync(
+        return await boardRepository.GetTaskAsync(
                    projectId,
                    taskId,
                    cancellationToken)
@@ -385,8 +392,6 @@ public sealed class BoardService
         }
     }
 
-    private readonly TaskOrderCalculator _taskOrderCalculator;
-
     public async Task<MoveTaskResponse> MoveTaskAsync(
         Guid projectId,
         Guid taskId,
@@ -430,7 +435,7 @@ public sealed class BoardService
                 };
 
         var affectedTasks =
-            await _boardRepository.GetTasksForColumnsAsync(
+            await boardRepository.GetTasksForColumnsAsync(
                 projectId,
                 affectedColumnIds,
                 cancellationToken);
@@ -455,7 +460,7 @@ public sealed class BoardService
                     .Select(item => item.Id)
                     .ToList();
 
-        var plan = _taskOrderCalculator.Calculate(
+        var plan = taskOrderCalculator.Calculate(
             taskId,
             sourceColumnId,
             request.TargetColumnId,
@@ -481,11 +486,11 @@ public sealed class BoardService
                 change.SortOrder);
         }
 
-        await _unitOfWork.SaveChangesAsync(
+        await unitOfWork.SaveChangesAsync(
             cancellationToken);
 
         var affectedColumns =
-            await _boardRepository.GetColumnDtosAsync(
+            await boardRepository.GetColumnDtosAsync(
                 projectId,
                 affectedColumnIds,
                 cancellationToken);
@@ -495,5 +500,22 @@ public sealed class BoardService
             sourceColumnId,
             request.TargetColumnId,
             affectedColumns);
+    }
+
+    private Task NotifyTaskChangeAsync(
+        Guid projectId,
+        Guid taskId,
+        BoardChangeType changeType)
+    {
+        var notification =
+            new BoardChangedNotification(
+                Guid.NewGuid(),
+                projectId,
+                changeType,
+                taskId,
+                DateTimeOffset.UtcNow);
+
+        return realtimeNotifier
+            .NotifyBoardChangedAsync(notification);
     }
 }

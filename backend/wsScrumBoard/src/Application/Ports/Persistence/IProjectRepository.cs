@@ -17,4 +17,8 @@ public interface IProjectRepository
     void Add(Project project);
 
     void Remove(Project project);
+    
+    Task<bool> ExistsAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default);
 }

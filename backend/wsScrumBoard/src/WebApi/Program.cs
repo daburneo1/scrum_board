@@ -1,8 +1,10 @@
 ﻿using Application;
+using Application.RealTime.Boards;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using WebApi.ErrorHandling;
+using WebApi.RealTime;
 
 const string corsPolicyName = "Frontend";
 
@@ -75,6 +77,12 @@ builder.Services
     .AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>("postgresql");
 
+builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<
+    IBoardRealtimeNotifier,
+    SignalRBoardRealtimeNotifier>();
+
 var app = builder.Build();
 
 var applyMigrations =
@@ -99,6 +107,13 @@ app.UseCors(corsPolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<BoardHub>(
+    "/hubs/board",
+    options =>
+    {
+        options.CloseOnAuthenticationExpiration = true;
+    });
 
 app.MapControllers();
 app.MapHealthChecks("/health");
