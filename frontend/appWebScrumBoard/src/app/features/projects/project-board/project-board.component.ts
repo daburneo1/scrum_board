@@ -10,7 +10,8 @@ import {
     BoardTask,
     ProjectBoard,
     UserOption,
-    WorkItemPriority
+    WorkItemPriority,
+    MoveTaskResponse,
 } from "../models/board.models";
 import {finalize} from "rxjs";
 import {ReactiveFormsModule, FormBuilder, Validators} from "@angular/forms";
@@ -20,6 +21,12 @@ import {InputTextareaModule} from "primeng/inputtextarea";
 import {DropdownModule} from "primeng/dropdown";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ConfirmationService} from "primeng/api";
+import {
+    CdkDragDrop,
+    DragDropModule,
+    moveItemInArray,
+    transferArrayItem
+} from '@angular/cdk/drag-drop';
 
 
 @Component({
@@ -34,7 +41,8 @@ import {ConfirmationService} from "primeng/api";
         InputTextModule,
         InputTextareaModule,
         DropdownModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        DragDropModule
     ],
     templateUrl: './project-board.component.html',
     styleUrl: './project-board.component.scss'
@@ -398,5 +406,125 @@ export class ProjectBoardComponent implements OnInit {
                         'No fue posible reordenar las columnas.';
                 }
             });
+    }
+
+    movingTaskId: string | null = null;
+
+    dropTask(
+        event: CdkDragDrop<BoardTask[]>
+    ): void {
+        if (
+            !this.board ||
+            this.movingTaskId
+        ) {
+            return;
+        }
+
+        if (
+            event.previousContainer === event.container &&
+            event.previousIndex === event.currentIndex
+        ) {
+            return;
+        }
+
+        const movedTask = event.item.data as BoardTask;
+
+        const previousBoard =
+            this.cloneBoard(this.board);
+
+        if (event.previousContainer === event.container) {
+            moveItemInArray(
+                event.container.data,
+                event.previousIndex,
+                event.currentIndex
+            );
+        } else {
+            transferArrayItem(
+                event.previousContainer.data,
+                event.container.data,
+                event.previousIndex,
+                event.currentIndex
+            );
+        }
+
+        this.movingTaskId = movedTask.id;
+
+        this.boardService
+            .moveTask(
+                this.board.projectId,
+                movedTask.id,
+                {
+                    targetColumnId:
+                    event.container.id,
+                    targetIndex:
+                    event.currentIndex
+                }
+            )
+            .pipe(
+                finalize(() => {
+                    this.movingTaskId = null;
+                })
+            )
+            .subscribe({
+                next: response => {
+                    this.applyCanonicalColumns(response);
+                },
+                error: error => {
+                    this.board = previousBoard;
+
+                    this.errorMessage = this.getErrorDetail(
+                        error,
+                        'No fue posible mover la tarea. El movimiento fue revertido.'
+                    );
+                }
+            });
+    }
+
+    private cloneBoard(
+        board: ProjectBoard
+    ): ProjectBoard {
+        return {
+            ...board,
+            columns: board.columns.map(column => ({
+                ...column,
+                tasks: [...column.tasks]
+            }))
+        };
+    }
+
+    private applyCanonicalColumns(
+        response: MoveTaskResponse
+    ): void {
+        if (!this.board) {
+            return;
+        }
+
+        const columnsById = new Map(
+            response.affectedColumns.map(column => [
+                column.id,
+                column
+            ])
+        );
+
+        this.board = {
+            ...this.board,
+            columns: this.board.columns.map(column =>
+                columnsById.get(column.id) ?? column
+            )
+        };
+    }
+
+    trackTaskById(
+        _index: number,
+        task: BoardTask
+    ): string {
+        return task.id;
+    }
+
+    trackColumnById(
+        _index: number,
+        column: BoardColumn
+    ): string {
+        return column.id;
     }
 }

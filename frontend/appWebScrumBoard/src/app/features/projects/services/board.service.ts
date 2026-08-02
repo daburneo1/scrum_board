@@ -1,7 +1,14 @@
 import {HttpClient} from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
-import {BoardColumn, BoardTask, ProjectBoard, SaveTaskRequest, UserOption} from "../models/board.models";
+import {
+    BoardColumn,
+    BoardTask,
+    MoveTaskRequest, MoveTaskResponse,
+    ProjectBoard,
+    SaveTaskRequest,
+    UserOption
+} from "../models/board.models";
 import {environment} from "../../../../environments/environment";
 
 
@@ -98,6 +105,17 @@ export class BoardService {
     ): Observable<void> {
         return this.http.delete<void>(
             `${environment.apiBaseUrl}/projects/${projectId}/tasks/${taskId}`
+        );
+    }
+
+    moveTask(
+        projectId: string,
+        taskId: string,
+        request: MoveTaskRequest
+    ): Observable<MoveTaskResponse> {
+        return this.http.put<MoveTaskResponse>(
+            `${environment.apiBaseUrl}/projects/${projectId}/tasks/${taskId}/position`,
+            request
         );
     }
 }

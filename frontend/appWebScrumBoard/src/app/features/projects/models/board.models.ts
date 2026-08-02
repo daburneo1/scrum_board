@@ -43,3 +43,15 @@ export interface SaveTaskRequest {
     assignedUserId: string | null;
     columnId?: string;
 }
+
+export interface MoveTaskRequest {
+    targetColumnId: string;
+    targetIndex: number;
+}
+
+export interface MoveTaskResponse {
+    taskId: string;
+    sourceColumnId: string;
+    targetColumnId: string;
+    affectedColumns: BoardColumn[];
+}
