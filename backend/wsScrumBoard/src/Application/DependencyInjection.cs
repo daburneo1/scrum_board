@@ -1,4 +1,5 @@
 ﻿using Application.Services.Authentication;
+using Application.Services.Boards;
 using Application.Services.Projects;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@ public static class DependencyInjection
     {
         services.AddScoped<LoginService>();
         services.AddScoped<ProjectService>();
+        services.AddScoped<BoardService>();
 
         return services;
     }
