@@ -495,6 +495,11 @@ public sealed class BoardService(
                 affectedColumnIds,
                 cancellationToken);
 
+        await NotifyTaskChangeAsync(
+            projectId,
+            taskId,
+            BoardChangeType.TaskMoved);
+
         return new MoveTaskResponse(
             taskId,
             sourceColumnId,
