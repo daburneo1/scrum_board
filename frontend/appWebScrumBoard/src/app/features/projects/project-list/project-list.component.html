@@ -1,1 +1,239 @@
-<p>project-list works!</p>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="card">
+    <p-toolbar styleClass="mb-4">
+        <ng-template pTemplate="left">
+            <button
+                pButton
+                pRipple
+                type="button"
+                label="Nuevo proyecto"
+                icon="pi pi-plus"
+                class="p-button-success"
+                (click)="openCreate()"
+            ></button>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <span class="p-input-icon-left">
+                <i class="pi pi-search"></i>
+
+                <input
+                    pInputText
+                    type="text"
+                    [formControl]="filterControl"
+                    placeholder="Buscar por nombre"
+                >
+            </span>
+        </ng-template>
+    </p-toolbar>
+
+    <p-table
+        [value]="projects"
+        [lazy]="true"
+        [paginator]="true"
+        [rows]="pageSize"
+        [first]="first"
+        [totalRecords]="totalRecords"
+        [loading]="loading"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        responsiveLayout="scroll"
+        (onLazyLoad)="onLazyLoad($event)"
+    >
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Inicio</th>
+                <th>Fin previsto</th>
+                <th>Estado</th>
+                <th style="width: 9rem">Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template
+            pTemplate="body"
+            let-project
+        >
+            <tr>
+                <td>{{ project.name }}</td>
+
+                <td>
+                    {{ project.description || '—' }}
+                </td>
+
+                <td>
+                    {{ project.startDate }}
+                </td>
+
+                <td>
+                    {{ project.expectedEndDate }}
+                </td>
+
+                <td>
+                    <p-tag
+                        [value]="getStatusLabel(project.status)"
+                        [severity]="getStatusSeverity(project.status)"
+                    ></p-tag>
+                </td>
+
+                <td>
+                    <button
+                        pButton
+                        pRipple
+                        type="button"
+                        icon="pi pi-pencil"
+                        class="p-button-rounded p-button-text mr-2"
+                        aria-label="Editar"
+                        (click)="openEdit(project)"
+                    ></button>
+
+                    <button
+                        pButton
+                        pRipple
+                        type="button"
+                        icon="pi pi-trash"
+                        class="p-button-rounded p-button-text p-button-danger"
+                        aria-label="Eliminar"
+                        (click)="confirmDelete(project)"
+                    ></button>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td
+                    colspan="6"
+                    class="text-center py-5"
+                >
+                    No se encontraron proyectos.
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog
+    [(visible)]="dialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '42rem' }"
+    [header]="
+        editingProjectId
+            ? 'Editar proyecto'
+            : 'Nuevo proyecto'
+    "
+>
+    <form
+        id="project-form"
+        [formGroup]="form"
+        (ngSubmit)="save()"
+        class="p-fluid"
+    >
+        <div class="field">
+            <label for="name">
+                Nombre
+            </label>
+
+            <input
+                id="name"
+                pInputText
+                formControlName="name"
+            >
+
+            <small
+                *ngIf="
+                    form.controls.name.invalid &&
+                    form.controls.name.touched
+                "
+                class="p-error"
+            >
+                El nombre es obligatorio.
+            </small>
+        </div>
+
+        <div class="field">
+            <label for="description">
+                Descripción
+            </label>
+
+            <textarea
+                id="description"
+                pInputTextarea
+                formControlName="description"
+                rows="4"
+            ></textarea>
+        </div>
+
+        <div class="grid">
+            <div class="field col-12 md:col-6">
+                <label for="startDate">
+                    Fecha de inicio
+                </label>
+
+                <p-calendar
+                    inputId="startDate"
+                    formControlName="startDate"
+                    dateFormat="yy-mm-dd"
+                    [showIcon]="true"
+                    appendTo="body"
+                ></p-calendar>
+            </div>
+
+            <div class="field col-12 md:col-6">
+                <label for="expectedEndDate">
+                    Fin previsto
+                </label>
+
+                <p-calendar
+                    inputId="expectedEndDate"
+                    formControlName="expectedEndDate"
+                    dateFormat="yy-mm-dd"
+                    [showIcon]="true"
+                    appendTo="body"
+                ></p-calendar>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="status">
+                Estado
+            </label>
+
+            <p-dropdown
+                inputId="status"
+                formControlName="status"
+                [options]="statusOptions"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+            ></p-dropdown>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            type="button"
+            label="Cancelar"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="dialogVisible = false"
+        ></button>
+
+        <button
+            pButton
+            pRipple
+            type="submit"
+            form="project-form"
+            label="Guardar"
+            icon="pi pi-check"
+            [loading]="saving"
+            [disabled]="saving"
+        ></button>
+    </ng-template>
+</p-dialog>
