@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Npgsql;
 
 namespace Infrastructure;
 
@@ -19,7 +18,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = BuildPostgresConnectionString();
+        var connectionString =
+            PostgresConnectionStringFactory.CreateFromEnvironment();
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -82,36 +82,5 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         return services;
-    }
-
-    private static string BuildPostgresConnectionString()
-    {
-        var portValue = GetRequiredEnvironmentVariable("POSTGRES_PORT");
-
-        if (!int.TryParse(portValue, out var port) || port is < 1 or > 65535)
-        {
-            throw new InvalidOperationException(
-                "La variable de entorno POSTGRES_PORT debe contener un puerto TCP válido.");
-        }
-
-        return new NpgsqlConnectionStringBuilder
-        {
-            Host = GetRequiredEnvironmentVariable("POSTGRES_HOST"),
-            Port = port,
-            Database = GetRequiredEnvironmentVariable("POSTGRES_DB"),
-            Username = GetRequiredEnvironmentVariable("POSTGRES_USER"),
-            Password = GetRequiredEnvironmentVariable("POSTGRES_PASSWORD"),
-            IncludeErrorDetail = true
-        }.ConnectionString;
-    }
-
-    private static string GetRequiredEnvironmentVariable(string name)
-    {
-        var value = Environment.GetEnvironmentVariable(name);
-
-        return !string.IsNullOrWhiteSpace(value)
-            ? value
-            : throw new InvalidOperationException(
-                $"La variable de entorno {name} no está configurada.");
     }
 }

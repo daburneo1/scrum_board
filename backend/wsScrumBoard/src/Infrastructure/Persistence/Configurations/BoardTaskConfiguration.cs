@@ -51,7 +51,7 @@ internal sealed class BoardTaskConfiguration :
         builder.HasOne(task => task.Column)
             .WithMany(column => column.Tasks)
             .HasForeignKey(task => task.ColumnId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(task => task.AssignedUser)
             .WithMany(user => user.AssignedTasks)

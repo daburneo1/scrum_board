@@ -65,4 +65,30 @@ public sealed class BoardTask : Entity
     public Guid? AssignedUserId { get; private set; }
 
     public AppUser? AssignedUser { get; private set; }
+    
+    public void Update(
+        string title,
+        string description,
+        WorkItemPriority priority,
+        Guid? assignedUserId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+
+        Title = title.Trim();
+        Description = description?.Trim() ?? string.Empty;
+        Priority = priority;
+        AssignedUserId = assignedUserId;
+    }
+
+    public void ChangeSortOrder(int sortOrder)
+    {
+        if (sortOrder < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(sortOrder),
+                "El orden no puede ser negativo.");
+        }
+
+        SortOrder = sortOrder;
+    }
 }

@@ -49,4 +49,21 @@ public sealed class BoardColumn : Entity
 
     public ICollection<BoardTask> Tasks { get; private set; } =
         new List<BoardTask>();
+    public void Rename(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        Name = name.Trim();
+    }
+    public void ChangeSortOrder(int sortOrder)
+    {
+        if (sortOrder < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(sortOrder),
+                "El orden no puede ser negativo.");
+        }
+
+        SortOrder = sortOrder;
+    }
 }
