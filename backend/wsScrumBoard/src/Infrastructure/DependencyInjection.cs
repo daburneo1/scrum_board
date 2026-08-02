@@ -33,7 +33,8 @@ public static class DependencyInjection
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
-
+        services.AddScoped<IBoardRepository, BoardRepository>();
+        
         services
             .AddOptions<JwtOptions>()
             .Bind(configuration.GetSection(JwtOptions.SectionName))
