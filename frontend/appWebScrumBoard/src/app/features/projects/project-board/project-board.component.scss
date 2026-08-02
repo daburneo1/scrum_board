@@ -1,0 +1,36 @@
+.board-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+}
+
+.board-column {
+    flex: 0 0 22rem;
+    min-height: 12rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--surface-ground);
+}
+
+.column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.task-card {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+}

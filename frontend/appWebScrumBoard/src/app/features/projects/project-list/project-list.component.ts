@@ -30,6 +30,7 @@ import {
     ProjectStatus,
     SaveProjectRequest
 } from '../models/project.models';
+import {Router} from "@angular/router";
 
 @Component({
     selector: 'app-project-list',
@@ -114,7 +115,8 @@ export class ProjectListComponent
         private readonly formBuilder: FormBuilder,
         private readonly projectService: ProjectService,
         private readonly confirmationService: ConfirmationService,
-        private readonly messageService: MessageService
+        private readonly messageService: MessageService,
+        private readonly router: Router
     ) {
     }
 
@@ -377,5 +379,13 @@ export class ProjectListComponent
             summary: 'Error',
             detail
         });
+    }
+
+    openBoard(project: Project): void {
+        void this.router.navigate([
+            '/projects',
+            project.id,
+            'board'
+        ]);
     }
 }

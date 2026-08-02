@@ -48,7 +48,7 @@
                 <th>Inicio</th>
                 <th>Fin previsto</th>
                 <th>Estado</th>
-                <th style="width: 9rem">Acciones</th>
+                <th style="width: 22rem">Acciones</th>
             </tr>
         </ng-template>
 
@@ -79,6 +79,16 @@
                 </td>
 
                 <td>
+                    <button
+                        pButton
+                        pRipple
+                        type="button"
+                        label="Abrir tablero"
+                        icon="pi pi-th-large"
+                        class="p-button-sm p-button-text mr-2"
+                        (click)="openBoard(project)"
+                    ></button>
+
                     <button
                         pButton
                         pRipple
