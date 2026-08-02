@@ -55,3 +55,23 @@ export interface MoveTaskResponse {
     targetColumnId: string;
     affectedColumns: BoardColumn[];
 }
+
+export type BoardChangeType =
+    | 'TaskCreated'
+    | 'TaskUpdated'
+    | 'TaskDeleted'
+    | 'TaskMoved';
+
+export interface BoardChangedNotification {
+    eventId: string;
+    projectId: string;
+    changeType: BoardChangeType;
+    taskId: string;
+    occurredAtUtc: string;
+}
+
+export type RealtimeConnectionState =
+    | 'connecting'
+    | 'connected'
+    | 'reconnecting'
+    | 'disconnected';

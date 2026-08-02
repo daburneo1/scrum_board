@@ -1,6 +1,6 @@
 import {ButtonModule} from "primeng/button";
 import {TagModule} from "primeng/tag";
-import {Component, inject, OnInit} from "@angular/core";
+import {Component, inject, OnInit, OnDestroy} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
@@ -11,7 +11,7 @@ import {
     ProjectBoard,
     UserOption,
     WorkItemPriority,
-    MoveTaskResponse,
+    MoveTaskResponse, BoardChangedNotification, RealtimeConnectionState,
 } from "../models/board.models";
 import {finalize} from "rxjs";
 import {ReactiveFormsModule, FormBuilder, Validators} from "@angular/forms";
@@ -27,6 +27,13 @@ import {
     moveItemInArray,
     transferArrayItem
 } from '@angular/cdk/drag-drop';
+import {
+    Subject,
+    auditTime,
+    filter,
+    takeUntil
+} from 'rxjs';
+import {BoardRealtimeService} from "../services/board-realtime.service";
 
 
 @Component({
@@ -97,9 +104,76 @@ export class ProjectBoardComponent implements OnInit {
 
         this.loadBoard(projectId);
         this.loadUsers();
+
+        this.boardRealtimeService
+            .boardChanged$
+            .pipe(
+                filter(notification =>
+                    notification.projectId === projectId
+                ),
+                auditTime(100),
+                takeUntil(this.destroy$)
+            )
+            .subscribe(notification => {
+                this.handleRealtimeChange(
+                    notification,
+                    projectId
+                );
+            });
+
+        void this.connectRealtime(projectId);
+
+        this.loadBoard(projectId);
     }
 
-    loadBoard(projectId?: string): void {
+    private async connectRealtime(
+        projectId: string
+    ): Promise<void> {
+        try {
+            await this.boardRealtimeService.connect(
+                projectId
+            );
+        } catch (error) {
+            console.error(
+                'Could not connect to the board hub.',
+                error
+            );
+
+            /*
+             * El tablero continúa siendo utilizable
+             * mediante REST aunque falle SignalR.
+             */
+        }
+    }
+
+    private handleRealtimeChange(
+        notification: BoardChangedNotification,
+        projectId: string
+    ): void {
+        const occurredAt =
+            Date.parse(notification.occurredAtUtc);
+
+        if (Number.isFinite(occurredAt)) {
+            const approximateLatency =
+                Date.now() - occurredAt;
+
+            console.info(
+                'Board event received:',
+                notification.changeType,
+                `${approximateLatency} ms`
+            );
+        }
+
+        /*
+         * REST sigue siendo la fuente de verdad.
+         */
+        this.loadBoard(projectId, false);
+    }
+
+    loadBoard(
+        projectId?: string,
+        showLoading = true
+    ): void {
         const resolvedProjectId =
             projectId ?? this.board?.projectId;
 
@@ -107,14 +181,19 @@ export class ProjectBoardComponent implements OnInit {
             return;
         }
 
-        this.loading = true;
+        if (showLoading) {
+            this.loading = true;
+        }
+
         this.errorMessage = '';
 
         this.boardService
             .getBoard(resolvedProjectId)
             .pipe(
                 finalize(() => {
-                    this.loading = false;
+                    if (showLoading) {
+                        this.loading = false;
+                    }
                 })
             )
             .subscribe({
@@ -125,6 +204,29 @@ export class ProjectBoardComponent implements OnInit {
                     this.errorMessage =
                         'No fue posible cargar el tablero.';
                 }
+            });
+    }
+
+    ngOnDestroy(): void {
+        console.log(
+            '[ProjectBoardComponent] ngOnDestroy ejecutado'
+        );
+
+        this.destroy$.next();
+        this.destroy$.complete();
+
+        void this.boardRealtimeService
+            .disconnect()
+            .then(() => {
+                console.log(
+                    '[ProjectBoardComponent] SignalR desconectado'
+                );
+            })
+            .catch(error => {
+                console.error(
+                    '[ProjectBoardComponent] Error al desconectar SignalR',
+                    error
+                );
             });
     }
 
@@ -526,5 +628,48 @@ export class ProjectBoardComponent implements OnInit {
         column: BoardColumn
     ): string {
         return column.id;
+    }
+
+    private readonly boardRealtimeService =
+        inject(BoardRealtimeService);
+
+    private readonly destroy$ =
+        new Subject<void>();
+
+    readonly realtimeState$ =
+        this.boardRealtimeService.connectionState$;
+
+    getRealtimeLabel(
+        state: RealtimeConnectionState
+    ): string {
+        switch (state) {
+            case 'connected':
+                return 'Tiempo real conectado';
+
+            case 'connecting':
+                return 'Conectando...';
+
+            case 'reconnecting':
+                return 'Reconectando...';
+
+            default:
+                return 'Tiempo real desconectado';
+        }
+    }
+
+    getRealtimeSeverity(
+        state: RealtimeConnectionState
+    ): 'success' | 'warning' | 'danger' | 'info' {
+        switch (state) {
+            case 'connected':
+                return 'success';
+
+            case 'connecting':
+            case 'reconnecting':
+                return 'warning';
+
+            default:
+                return 'danger';
+        }
     }
 }

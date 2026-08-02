@@ -1,5 +1,14 @@
 <p-confirmDialog></p-confirmDialog>
 
+<ng-container
+    *ngIf="realtimeState$ | async as realtimeState"
+>
+    <p-tag
+        [value]="getRealtimeLabel(realtimeState)"
+        [severity]="getRealtimeSeverity(realtimeState)"
+    ></p-tag>
+</ng-container>
+
 <div *ngIf="errorMessage" class="p-error mb-3">
     {{ errorMessage }}
 </div>
