@@ -50,6 +50,7 @@ public sealed class GlobalExceptionHandler :
                 400 => "Error de validación",
                 401 => "Error de autenticación",
                 404 => "Recurso no encontrado",
+                409 => "Conflicto con el estado actual del recurso.",
                 _ => "Error interno del servidor"
             },
             Detail = statusCode == 500
