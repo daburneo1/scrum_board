@@ -4,6 +4,8 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using WebApi.ErrorHandling;
 
+const string corsPolicyName = "Frontend";
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration["Jwt:Key"] =
@@ -46,6 +48,26 @@ builder.Services.AddProblemDetails(options =>
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicyName, policy =>
+    {
+        if (allowedOrigins.Length == 0)
+        {
+            return;
+        }
+
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -72,6 +94,8 @@ if (applyMigrations)
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+app.UseCors(corsPolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
