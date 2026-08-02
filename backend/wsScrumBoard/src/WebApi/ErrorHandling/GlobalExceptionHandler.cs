@@ -31,6 +31,9 @@ public sealed class GlobalExceptionHandler :
             NotFoundException =>
                 StatusCodes.Status404NotFound,
 
+            ConflictException =>
+                StatusCodes.Status409Conflict,
+
             _ =>
                 StatusCodes.Status500InternalServerError
         };
