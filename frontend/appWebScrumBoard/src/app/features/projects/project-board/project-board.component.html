@@ -14,18 +14,43 @@
 </div>
 
 <div *ngIf="board" class="board-page">
-    <div class="flex justify-content-between align-items-center mb-4">
+    <div class="flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <h2 class="m-0">{{ board.projectName }}</h2>
             <span class="text-600">Tablero del proyecto</span>
         </div>
 
-        <button
-            pButton
-            label="Agregar columna"
-            icon="pi pi-plus"
-            (click)="openCreateColumn()"
-        ></button>
+        <div class="flex flex-wrap gap-2">
+            <button
+                pButton
+                type="button"
+                label="Agregar columna"
+                icon="pi pi-plus"
+                (click)="openCreateColumn()"
+            ></button>
+
+            <button
+                pButton
+                type="button"
+                label="Exportar PDF"
+                icon="pi pi-file-pdf"
+                class="p-button-outlined"
+                [loading]="downloadingReport === 'pdf'"
+                [disabled]="downloadingReport !== null"
+                (click)="downloadReport('pdf')"
+            ></button>
+
+            <button
+                pButton
+                type="button"
+                label="Exportar Excel"
+                icon="pi pi-file-excel"
+                class="p-button-outlined p-button-success"
+                [loading]="downloadingReport === 'xlsx'"
+                [disabled]="downloadingReport !== null"
+                (click)="downloadReport('xlsx')"
+            ></button>
+        </div>
     </div>
 
     <div class="board-container" cdkDropListGroup>

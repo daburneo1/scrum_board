@@ -1,6 +1,7 @@
 ﻿using Application.Services.Authentication;
 using Application.Services.Boards;
 using Application.Services.Projects;
+using Application.Services.Reports;
 using Application.Tasks.Ordering;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,9 @@ public static class DependencyInjection
         services.AddScoped<BoardService>();
         services.AddScoped<TaskOrderCalculator>();
         services.AddScoped<BoardSubscriptionService>();
+        services.AddScoped<ProjectReportService>();
+
+        services.AddSingleton(TimeProvider.System);
 
         return services;
     }

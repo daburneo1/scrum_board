@@ -1,9 +1,12 @@
-﻿using System.Text;
+﻿﻿using System.Text;
+using Application.Contracts.Reports;
 using Application.Ports.Persistence;
+using Application.Ports.Reports;
 using Application.Ports.Security;
 using Infrastructure.Authentication;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.Reports;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +38,12 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IBoardRepository, BoardRepository>();
+
+        services.AddScoped<IProjectReportRepository, ProjectReportRepository>();
+        
+        services.AddSingleton<IProjectReportExporter, EpPlusProjectReportExporter>();
+
+        services.AddSingleton<IProjectReportExporter, QuestPdfProjectReportExporter>();
         
         services
             .AddOptions<JwtOptions>()

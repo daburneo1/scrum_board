@@ -2,7 +2,7 @@ import {ButtonModule} from "primeng/button";
 import {TagModule} from "primeng/tag";
 import {Component, inject, OnInit, OnDestroy} from "@angular/core";
 import {CommonModule} from "@angular/common";
-import {HttpErrorResponse} from "@angular/common/http";
+import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
 import {BoardService} from "../services/board.service";
 import {
@@ -34,6 +34,7 @@ import {
     takeUntil
 } from 'rxjs';
 import {BoardRealtimeService} from "../services/board-realtime.service";
+import {ProjectReportFormat, ProjectReportService} from "../services/project-report.service";
 
 
 @Component({
@@ -671,5 +672,119 @@ export class ProjectBoardComponent implements OnInit {
             default:
                 return 'danger';
         }
+    }
+
+    private readonly projectReportService =
+        inject(ProjectReportService);
+
+    downloadingReport:
+        ProjectReportFormat | null = null;
+
+    downloadReport(
+        format: ProjectReportFormat
+    ): void {
+        if (
+            !this.board ||
+            this.downloadingReport
+        ) {
+            return;
+        }
+
+        this.downloadingReport = format;
+
+        this.projectReportService
+            .getReport(
+                this.board.projectId,
+                format
+            )
+            .pipe(
+                finalize(() => {
+                    this.downloadingReport = null;
+                })
+            )
+            .subscribe({
+                next: response => {
+                    this.saveReportFile(
+                        response,
+                        format
+                    );
+                },
+                error: error => {
+                    this.errorMessage =
+                        'No fue posible descargar el reporte';
+                }
+            });
+    }
+
+    private saveReportFile(
+        response: HttpResponse<Blob>,
+        format: ProjectReportFormat
+    ): void {
+        const content = response.body;
+
+        if (!content || content.size === 0) {
+            throw new Error(
+                'The report response was empty.'
+            );
+        }
+
+        const contentDisposition =
+            response.headers.get(
+                'content-disposition'
+            );
+
+        const fileName =
+            this.extractFileName(
+                contentDisposition
+            ) ??
+            `project-report.${format}`;
+
+        const objectUrl =
+            URL.createObjectURL(content);
+
+        const anchor =
+            document.createElement('a');
+
+        anchor.href = objectUrl;
+        anchor.download = fileName;
+        anchor.style.display = 'none';
+
+        document.body.appendChild(anchor);
+
+        anchor.click();
+        anchor.remove();
+
+        setTimeout(() => {
+            URL.revokeObjectURL(objectUrl);
+        });
+    }
+
+    private extractFileName(
+        contentDisposition: string | null
+    ): string | null {
+        if (!contentDisposition) {
+            return null;
+        }
+
+        const encodedMatch =
+            /filename\*=UTF-8''([^;]+)/i
+                .exec(contentDisposition);
+
+        if (encodedMatch?.[1]) {
+            try {
+                return decodeURIComponent(
+                    encodedMatch[1]
+                );
+            } catch {
+                return encodedMatch[1];
+            }
+        }
+
+        const simpleMatch =
+            /filename="?([^";]+)"?/i
+                .exec(contentDisposition);
+
+        return simpleMatch?.[1]?.trim()
+            ?? null;
     }
 }
