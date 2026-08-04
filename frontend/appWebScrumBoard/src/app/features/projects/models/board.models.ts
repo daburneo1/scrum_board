@@ -76,6 +76,18 @@ export interface BoardChangedNotification {
     occurredAtUtc: string;
 }
 
+export interface BoardPresenceUser {
+    userId: string;
+    displayName: string;
+}
+
+export interface BoardPresenceSnapshot {
+    projectId: string;
+    connectedUserCount: number;
+    users: BoardPresenceUser[];
+    occurredAtUtc: string;
+}
+
 export type RealtimeConnectionState =
     | 'connecting'
     | 'connected'

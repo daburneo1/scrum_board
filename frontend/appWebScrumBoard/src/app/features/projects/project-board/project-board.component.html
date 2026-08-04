@@ -11,11 +11,43 @@
                 <h2>{{ board.projectName }}</h2>
 
                 <ng-container *ngIf="realtimeState$ | async as realtimeState">
-                    <p-tag
-                        styleClass="realtime-tag"
-                        [value]="getRealtimeLabel(realtimeState)"
-                        [severity]="getRealtimeSeverity(realtimeState)"
-                    ></p-tag>
+                    <ng-container *ngIf="presence$ | async as presence">
+                        <div
+                            class="presence-indicator"
+                            [class.presence-connected]="realtimeState === 'connected'"
+                            [class.presence-pending]="realtimeState === 'connecting' || realtimeState === 'reconnecting'"
+                            [class.presence-disconnected]="realtimeState === 'disconnected'"
+                            [pTooltip]="getPresenceTooltip(presence)"
+                            tooltipPosition="top"
+                        >
+                            <span class="presence-status-dot"></span>
+                            <span>
+                                {{ getRealtimeLabel(realtimeState) }}
+                                ·
+                                {{ getPresenceLabel(presence) }}
+                            </span>
+
+                            <span
+                                *ngIf="presence.users.length > 0"
+                                class="presence-avatars"
+                                aria-hidden="true"
+                            >
+                                <span
+                                    *ngFor="let user of getVisiblePresenceUsers(presence)"
+                                    class="presence-avatar"
+                                >
+                                    {{ getPresenceInitials(user) }}
+                                </span>
+
+                                <span
+                                    *ngIf="getRemainingPresenceUserCount(presence) > 0"
+                                    class="presence-avatar presence-avatar-extra"
+                                >
+                                    +{{ getRemainingPresenceUserCount(presence) }}
+                                </span>
+                            </span>
+                        </div>
+                    </ng-container>
                 </ng-container>
             </div>
 

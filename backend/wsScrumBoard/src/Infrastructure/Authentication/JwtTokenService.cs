@@ -21,6 +21,10 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
                 user.Id.ToString()),
 
             new Claim(
+                ClaimTypes.NameIdentifier,
+                user.Id.ToString()),
+
+            new Claim(
                 JwtRegisteredClaimNames.Email,
                 user.Email),
 

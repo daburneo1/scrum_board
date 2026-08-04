@@ -6,4 +6,7 @@ public interface IBoardClient
 {
     Task BoardChanged(
         BoardChangedNotification notification);
+
+    Task BoardPresenceChanged(
+        BoardPresenceSnapshot snapshot);
 }

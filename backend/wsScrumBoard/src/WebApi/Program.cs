@@ -81,6 +81,10 @@ builder.Services
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<
+    IBoardPresenceTracker,
+    InMemoryBoardPresenceTracker>();
+
+builder.Services.AddSingleton<
     IBoardRealtimeNotifier,
     SignalRBoardRealtimeNotifier>();
 

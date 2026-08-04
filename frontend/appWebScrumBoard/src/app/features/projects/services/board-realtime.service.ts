@@ -12,6 +12,7 @@ import {
 } from 'rxjs';
 import {
     BoardChangedNotification,
+    BoardPresenceSnapshot,
     RealtimeConnectionState
 } from '../models/board.models';
 import {TokenStorageService} from "../../../core/auth/token-storage.service";
@@ -32,11 +33,19 @@ export class BoardRealtimeService {
             'disconnected'
         );
 
+    private readonly presenceSubject =
+        new BehaviorSubject<BoardPresenceSnapshot>(
+            this.createEmptyPresenceSnapshot(null)
+        );
+
     readonly boardChanged$: Observable<BoardChangedNotification> =
         this.boardChangedSubject.asObservable();
 
     readonly connectionState$: Observable<RealtimeConnectionState> =
         this.connectionStateSubject.asObservable();
+
+    readonly presence$: Observable<BoardPresenceSnapshot> =
+        this.presenceSubject.asObservable();
 
     constructor(
         private readonly tokenStorage: TokenStorageService
@@ -48,6 +57,9 @@ export class BoardRealtimeService {
 
         this.currentProjectId = projectId;
         this.connectionStateSubject.next('connecting');
+        this.presenceSubject.next(
+            this.createEmptyPresenceSnapshot(projectId)
+        );
 
         const connection =
             new HubConnectionBuilder()
@@ -85,6 +97,25 @@ export class BoardRealtimeService {
 
                 this.boardChangedSubject.next(
                     notification
+                );
+            }
+        );
+
+        connection.on(
+            'BoardPresenceChanged',
+            (
+                snapshot:
+                BoardPresenceSnapshot
+            ) => {
+                if (
+                    snapshot.projectId !==
+                    this.currentProjectId
+                ) {
+                    return;
+                }
+
+                this.presenceSubject.next(
+                    snapshot
                 );
             }
         );
@@ -161,6 +192,7 @@ export class BoardRealtimeService {
             );
         } catch (error) {
             connection.off('BoardChanged');
+            connection.off('BoardPresenceChanged');
 
             try {
                 await connection.stop();
@@ -171,6 +203,9 @@ export class BoardRealtimeService {
             if (this.connection === connection) {
                 this.connection = null;
                 this.currentProjectId = null;
+                this.presenceSubject.next(
+                    this.createEmptyPresenceSnapshot(null)
+                );
             }
 
             this.connectionStateSubject.next(
@@ -199,6 +234,9 @@ export class BoardRealtimeService {
         if (!connection) {
             this.connectionStateSubject.next(
                 'disconnected'
+            );
+            this.presenceSubject.next(
+                this.createEmptyPresenceSnapshot(null)
             );
 
             console.log(
@@ -232,6 +270,7 @@ export class BoardRealtimeService {
         }
 
         connection.off('BoardChanged');
+        connection.off('BoardPresenceChanged');
 
         try {
             await connection.stop();
@@ -243,6 +282,20 @@ export class BoardRealtimeService {
             this.connectionStateSubject.next(
                 'disconnected'
             );
+            this.presenceSubject.next(
+                this.createEmptyPresenceSnapshot(null)
+            );
         }
+    }
+
+    private createEmptyPresenceSnapshot(
+        projectId: string | null
+    ): BoardPresenceSnapshot {
+        return {
+            projectId: projectId ?? '',
+            connectedUserCount: 0,
+            users: [],
+            occurredAtUtc: new Date(0).toISOString()
+        };
     }
 }

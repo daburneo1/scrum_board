@@ -13,6 +13,7 @@ import {
     UserOption,
     WorkItemPriority,
     MoveTaskResponse, BoardChangedNotification, RealtimeConnectionState,
+    BoardPresenceSnapshot, BoardPresenceUser,
 } from "../models/board.models";
 import {
     EMPTY,
@@ -730,6 +731,9 @@ export class ProjectBoardComponent implements OnInit, OnDestroy {
     readonly realtimeState$ =
         this.boardRealtimeService.connectionState$;
 
+    readonly presence$ =
+        this.boardRealtimeService.presence$;
+
     getRealtimeLabel(
         state: RealtimeConnectionState
     ): string {
@@ -762,6 +766,64 @@ export class ProjectBoardComponent implements OnInit, OnDestroy {
             default:
                 return 'danger';
         }
+    }
+
+    getPresenceLabel(
+        snapshot: BoardPresenceSnapshot
+    ): string {
+        const count = snapshot.connectedUserCount;
+
+        if (count === 1) {
+            return '1 usuario conectado';
+        }
+
+        return `${count} usuarios conectados`;
+    }
+
+    getPresenceTooltip(
+        snapshot: BoardPresenceSnapshot
+    ): string {
+        const names = snapshot.users
+            .map(user => user.displayName)
+            .filter(Boolean)
+            .join(', ');
+
+        const explanation =
+            'Incluye tu sesión actual. Varias pestañas del mismo usuario cuentan una sola vez.';
+
+        return names
+            ? `${names}. ${explanation}`
+            : explanation;
+    }
+
+    getVisiblePresenceUsers(
+        snapshot: BoardPresenceSnapshot
+    ): BoardPresenceUser[] {
+        return snapshot.users.slice(0, 3);
+    }
+
+    getRemainingPresenceUserCount(
+        snapshot: BoardPresenceSnapshot
+    ): number {
+        return Math.max(
+            snapshot.users.length - 3,
+            0
+        );
+    }
+
+    getPresenceInitials(
+        user: BoardPresenceUser
+    ): string {
+        const initials = user.displayName
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(part => part[0])
+            .join('')
+            .toUpperCase();
+
+        return initials || '?';
     }
 
     private readonly projectReportService =
