@@ -59,6 +59,60 @@
         </div>
     </div>
 
+    <form
+        class="board-filters"
+        [formGroup]="filterForm"
+    >
+        <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input
+                pInputText
+                type="text"
+                formControlName="search"
+                maxlength="100"
+                placeholder="Buscar tareas"
+                aria-label="Buscar tareas"
+            />
+        </span>
+
+        <p-dropdown
+            formControlName="assigneeId"
+            [options]="assigneeFilterOptions"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Todos los responsables"
+            appendTo="body"
+        ></p-dropdown>
+
+        <p-dropdown
+            formControlName="priority"
+            [options]="filterPriorityOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Todas las prioridades"
+            appendTo="body"
+        ></p-dropdown>
+
+        <button
+            pButton
+            type="button"
+            label="Limpiar filtros"
+            icon="pi pi-filter-slash"
+            class="p-button-text"
+            [disabled]="!hasActiveFilters()"
+            (click)="clearFilters()"
+        ></button>
+    </form>
+
+    <p
+        *ngIf="hasActiveFilters()"
+        class="drag-disabled-message"
+        role="status"
+        aria-live="polite"
+    >
+        Limpia los filtros para reordenar tareas.
+    </p>
+
     <div class="board-container" cdkDropListGroup>
         <section
             *ngFor="
@@ -125,10 +179,11 @@
 
             <div
                 class="task-list"
+                [class.task-list-disabled]="hasActiveFilters()"
                 cdkDropList
                 [id]="column.id"
                 [cdkDropListData]="column.tasks"
-                [cdkDropListDisabled]="movingTaskId !== null"
+                [cdkDropListDisabled]="movingTaskId !== null || hasActiveFilters()"
                 (cdkDropListDropped)="dropTask($event)"
             >
                 <article
@@ -137,9 +192,10 @@
                         trackBy: trackTaskById
                     "
                     class="task-card"
+                    [class.task-card-disabled]="hasActiveFilters()"
                     cdkDrag
                     [cdkDragData]="task"
-                    [cdkDragDisabled]="movingTaskId !== null"
+                    [cdkDragDisabled]="movingTaskId !== null || hasActiveFilters()"
                 >
                     <div class="task-card-header">
                         <div class="task-title">

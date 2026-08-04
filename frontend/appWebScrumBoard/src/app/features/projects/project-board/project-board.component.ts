@@ -8,12 +8,22 @@ import {BoardService} from "../services/board.service";
 import {
     BoardColumn,
     BoardTask,
+    ProjectTaskFilters,
     ProjectBoard,
     UserOption,
     WorkItemPriority,
     MoveTaskResponse, BoardChangedNotification, RealtimeConnectionState,
 } from "../models/board.models";
-import {finalize} from "rxjs";
+import {
+    EMPTY,
+    catchError,
+    debounceTime,
+    distinctUntilChanged,
+    finalize,
+    map,
+    switchMap,
+    tap
+} from "rxjs";
 import {ReactiveFormsModule, FormBuilder, Validators} from "@angular/forms";
 import {DialogModule} from "primeng/dialog";
 import {InputTextModule} from "primeng/inputtext";
@@ -57,7 +67,7 @@ import {ProjectReportFormat, ProjectReportService} from "../services/project-rep
     templateUrl: './project-board.component.html',
     styleUrl: './project-board.component.scss'
 })
-export class ProjectBoardComponent implements OnInit {
+export class ProjectBoardComponent implements OnInit, OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly boardService = inject(BoardService);
     private readonly formBuilder = inject(FormBuilder);
@@ -75,12 +85,28 @@ export class ProjectBoardComponent implements OnInit {
     savingTask = false;
     editingTaskId: string | null = null;
     users: UserOption[] = [];
+    assigneeFilterOptions: Array<{
+        id: string | null;
+        name: string;
+        email: string;
+    }> = [
+        {
+            id: null,
+            name: 'Todos los responsables',
+            email: ''
+        }
+    ];
 
     readonly priorityOptions = [
         {label: 'Baja', value: WorkItemPriority.Low},
         {label: 'Media', value: WorkItemPriority.Medium},
         {label: 'Alta', value: WorkItemPriority.High},
         {label: 'Crítica', value: WorkItemPriority.Critical}
+    ];
+
+    readonly filterPriorityOptions = [
+        {label: 'Todas', value: null},
+        ...this.priorityOptions
     ];
 
     readonly columnForm = this.formBuilder.group({
@@ -95,6 +121,12 @@ export class ProjectBoardComponent implements OnInit {
         columnId: ['', Validators.required]
     });
 
+    readonly filterForm = this.formBuilder.group({
+        assigneeId: [null as string | null],
+        priority: [null as WorkItemPriority | null],
+        search: ['', [Validators.maxLength(100)]]
+    });
+
     ngOnInit(): void {
         const projectId =
             this.route.snapshot.paramMap.get('projectId');
@@ -105,8 +137,42 @@ export class ProjectBoardComponent implements OnInit {
             return;
         }
 
-        this.loadBoard(projectId);
         this.loadUsers();
+
+        this.filterForm.valueChanges
+            .pipe(
+                debounceTime(300),
+                map(() => this.getActiveFilters()),
+                distinctUntilChanged((previous, current) =>
+                    this.areFiltersEqual(
+                        previous,
+                        current
+                    )
+                ),
+                tap(() => {
+                    this.loading = true;
+                    this.errorMessage = '';
+                }),
+                switchMap(filters =>
+                    this.boardService
+                        .getBoard(projectId, filters)
+                        .pipe(
+                            finalize(() => {
+                                this.loading = false;
+                            }),
+                            catchError(() => {
+                                this.errorMessage =
+                                    'No fue posible cargar el tablero.';
+
+                                return EMPTY;
+                            })
+                        )
+                ),
+                takeUntil(this.destroy$)
+            )
+            .subscribe(board => {
+                this.board = board;
+            });
 
         this.boardRealtimeService
             .boardChanged$
@@ -191,7 +257,10 @@ export class ProjectBoardComponent implements OnInit {
         this.errorMessage = '';
 
         this.boardService
-            .getBoard(resolvedProjectId)
+            .getBoard(
+                resolvedProjectId,
+                this.getActiveFilters()
+            )
             .pipe(
                 finalize(() => {
                     if (showLoading) {
@@ -410,7 +479,17 @@ export class ProjectBoardComponent implements OnInit {
 
     private loadUsers(): void {
         this.boardService.getUsers().subscribe({
-            next: users => this.users = users,
+            next: users => {
+                this.users = users;
+                this.assigneeFilterOptions = [
+                    {
+                        id: null,
+                        name: 'Todos los responsables',
+                        email: ''
+                    },
+                    ...users
+                ];
+            },
             error: () => {
                 this.errorMessage = 'No fue posible cargar los usuarios.';
             }
@@ -520,7 +599,8 @@ export class ProjectBoardComponent implements OnInit {
     ): void {
         if (
             !this.board ||
-            this.movingTaskId
+            this.movingTaskId ||
+            this.hasActiveFilters()
         ) {
             return;
         }
@@ -572,6 +652,14 @@ export class ProjectBoardComponent implements OnInit {
             )
             .subscribe({
                 next: response => {
+                    if (this.hasActiveFilters()) {
+                        this.loadBoard(
+                            this.board?.projectId,
+                            false
+                        );
+                        return;
+                    }
+
                     this.applyCanonicalColumns(response);
                 },
                 error: error => {
@@ -697,7 +785,8 @@ export class ProjectBoardComponent implements OnInit {
         this.projectReportService
             .getReport(
                 this.board.projectId,
-                format
+                format,
+                this.getActiveFilters()
             )
             .pipe(
                 finalize(() => {
@@ -716,6 +805,43 @@ export class ProjectBoardComponent implements OnInit {
                         'No fue posible descargar el reporte';
                 }
             });
+    }
+
+    clearFilters(): void {
+        this.filterForm.reset({
+            assigneeId: null,
+            priority: null,
+            search: ''
+        });
+    }
+
+    private getActiveFilters(): ProjectTaskFilters {
+        const value = this.filterForm.getRawValue();
+
+        return {
+            assigneeId: value.assigneeId ?? null,
+            priority: value.priority ?? null,
+            search: value.search?.trim() || null
+        };
+    }
+
+    hasActiveFilters(): boolean {
+        const filters = this.getActiveFilters();
+
+        return Boolean(
+            filters.assigneeId ||
+            filters.priority !== null ||
+            filters.search
+        );
+    }
+
+    private areFiltersEqual(
+        previous: ProjectTaskFilters,
+        current: ProjectTaskFilters
+    ): boolean {
+        return previous.assigneeId === current.assigneeId &&
+            previous.priority === current.priority &&
+            previous.search === current.search;
     }
 
     private saveReportFile(
