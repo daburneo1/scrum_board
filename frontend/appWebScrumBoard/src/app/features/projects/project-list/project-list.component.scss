@@ -1,0 +1,103 @@
+.project-list-page {
+    padding: 1.25rem;
+}
+
+.project-list-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        letter-spacing: 0;
+    }
+
+    span {
+        display: block;
+        margin-top: .25rem;
+        color: var(--text-color-secondary);
+    }
+}
+
+:host ::ng-deep .project-list-toolbar {
+    margin-bottom: 1rem;
+    padding: .75rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    background: var(--surface-ground);
+}
+
+:host ::ng-deep .project-table {
+    .p-datatable-thead > tr > th {
+        padding-top: .75rem;
+        padding-bottom: .75rem;
+        color: var(--text-color-secondary);
+        font-size: .85rem;
+        text-transform: uppercase;
+    }
+
+    .p-datatable-tbody > tr > td {
+        padding-top: .85rem;
+        padding-bottom: .85rem;
+        vertical-align: middle;
+    }
+}
+
+.project-name {
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.project-description {
+    color: var(--text-color-secondary);
+}
+
+.project-actions {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+
+:host ::ng-deep .scrum-dialog {
+    .p-dialog-header {
+        padding-bottom: .75rem;
+    }
+
+    .p-dialog-content {
+        padding-top: .25rem;
+    }
+}
+
+.scrum-form {
+    .field {
+        margin-bottom: 1rem;
+    }
+
+    label {
+        display: inline-block;
+        margin-bottom: .4rem;
+        font-weight: 600;
+    }
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    width: 100%;
+}
+
+@media (max-width: 640px) {
+    .project-list-page {
+        padding: 1rem;
+    }
+
+    :host ::ng-deep .project-list-toolbar .p-toolbar-group-right,
+    :host ::ng-deep .project-list-toolbar .p-input-icon-left,
+    :host ::ng-deep .project-list-toolbar input {
+        width: 100%;
+    }
+}

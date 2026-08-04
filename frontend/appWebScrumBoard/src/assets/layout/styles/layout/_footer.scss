@@ -1,0 +1,14 @@
+.layout-footer {
+    transition: margin-left $transitionDuration;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding-top: 1rem;
+    color: var(--text-color-secondary);
+    border-top: 1px solid var(--surface-border);
+
+    .layout-footer-separator {
+        color: var(--surface-500);
+    }
+}

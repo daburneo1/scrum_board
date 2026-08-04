@@ -1,0 +1,18 @@
+<div class="layout-topbar">
+    <a class="layout-topbar-logo" routerLink="">
+        <img src="assets/layout/images/{{layoutService.config().colorScheme === 'light' ? 'logo_dark' : 'logo_white'}}.png" alt="ScrumBoard">
+        <span>ScrumBoard</span>
+    </a>
+
+    <button
+        #menubutton
+        class="p-link layout-menu-button layout-topbar-button"
+        type="button"
+        aria-label="Alternar menu"
+        title="Alternar menu"
+        (click)="layoutService.onMenuToggle()"
+    >
+        <i class="pi pi-bars"></i>
+    </button>
+
+</div>

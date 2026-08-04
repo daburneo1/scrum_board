@@ -1,0 +1,360 @@
+<p-confirmDialog></p-confirmDialog>
+
+<div *ngIf="errorMessage" class="p-error mb-3">
+    {{ errorMessage }}
+</div>
+
+<div *ngIf="board" class="board-page">
+    <div class="board-header">
+        <div class="board-title-block">
+            <div class="board-title-row">
+                <h2>{{ board.projectName }}</h2>
+
+                <ng-container *ngIf="realtimeState$ | async as realtimeState">
+                    <p-tag
+                        styleClass="realtime-tag"
+                        [value]="getRealtimeLabel(realtimeState)"
+                        [severity]="getRealtimeSeverity(realtimeState)"
+                    ></p-tag>
+                </ng-container>
+            </div>
+
+            <span>Tablero del proyecto</span>
+        </div>
+
+        <div class="board-actions">
+            <button
+                pButton
+                type="button"
+                label="Agregar columna"
+                icon="pi pi-plus"
+                (click)="openCreateColumn()"
+            ></button>
+
+            <button
+                pButton
+                type="button"
+                label="Exportar PDF"
+                icon="pi pi-file-pdf"
+                class="p-button-outlined"
+                pTooltip="Descargar reporte en PDF"
+                tooltipPosition="top"
+                [loading]="downloadingReport === 'pdf'"
+                [disabled]="downloadingReport !== null"
+                (click)="downloadReport('pdf')"
+            ></button>
+
+            <button
+                pButton
+                type="button"
+                label="Exportar Excel"
+                icon="pi pi-file-excel"
+                class="p-button-outlined p-button-success"
+                pTooltip="Descargar reporte en Excel"
+                tooltipPosition="top"
+                [loading]="downloadingReport === 'xlsx'"
+                [disabled]="downloadingReport !== null"
+                (click)="downloadReport('xlsx')"
+            ></button>
+        </div>
+    </div>
+
+    <div class="board-container" cdkDropListGroup>
+        <section
+            *ngFor="
+                let column of board.columns;
+                let index = index;
+                trackBy: trackColumnById
+            "
+            class="board-column"
+        >
+            <header class="column-header">
+                <div class="column-title">
+                    <strong>{{ column.name }}</strong>
+                    <span>{{ column.tasks.length }}</span>
+                </div>
+
+                <div class="column-actions">
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-angle-left"
+                        class="p-button-rounded p-button-text"
+                        aria-label="Mover columna a la izquierda"
+                        pTooltip="Mover a la izquierda"
+                        tooltipPosition="top"
+                        [disabled]="index === 0"
+                        (click)="moveColumn(index, -1)"
+                    ></button>
+
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-angle-right"
+                        class="p-button-rounded p-button-text"
+                        aria-label="Mover columna a la derecha"
+                        pTooltip="Mover a la derecha"
+                        tooltipPosition="top"
+                        [disabled]="index === board.columns.length - 1"
+                        (click)="moveColumn(index, 1)"
+                    ></button>
+
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-pencil"
+                        class="p-button-rounded p-button-text"
+                        aria-label="Editar columna"
+                        pTooltip="Editar columna"
+                        tooltipPosition="top"
+                        (click)="openEditColumn(column)"
+                    ></button>
+
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-trash"
+                        class="p-button-rounded p-button-text p-button-danger"
+                        aria-label="Eliminar columna"
+                        pTooltip="Eliminar columna"
+                        tooltipPosition="top"
+                        (click)="confirmDeleteColumn(column)"
+                    ></button>
+                </div>
+            </header>
+
+            <div
+                class="task-list"
+                cdkDropList
+                [id]="column.id"
+                [cdkDropListData]="column.tasks"
+                [cdkDropListDisabled]="movingTaskId !== null"
+                (cdkDropListDropped)="dropTask($event)"
+            >
+                <article
+                    *ngFor="
+                        let task of column.tasks;
+                        trackBy: trackTaskById
+                    "
+                    class="task-card"
+                    cdkDrag
+                    [cdkDragData]="task"
+                    [cdkDragDisabled]="movingTaskId !== null"
+                >
+                    <div class="task-card-header">
+                        <div class="task-title">
+                            <span
+                                cdkDragHandle
+                                class="drag-handle"
+                                aria-label="Arrastrar tarea"
+                                title="Arrastrar tarea"
+                            >
+                                <i class="pi pi-bars"></i>
+                            </span>
+
+                            <strong>{{ task.title }}</strong>
+                        </div>
+
+                        <p-tag
+                            [value]="getPriorityLabel(task.priority)"
+                            [severity]="getPrioritySeverity(task.priority)"
+                        ></p-tag>
+                    </div>
+
+                    <p class="task-description">
+                        {{ task.description || 'Sin descripcion' }}
+                    </p>
+
+                    <div class="task-footer">
+                        <small>
+                            <i class="pi pi-user mr-1"></i>
+                            {{
+                                task.assignedUserName ||
+                                'Sin responsable'
+                            }}
+                        </small>
+
+                        <div class="task-actions">
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-pencil"
+                                class="p-button-rounded p-button-text"
+                                aria-label="Editar tarea"
+                                pTooltip="Editar tarea"
+                                tooltipPosition="top"
+                                [disabled]="movingTaskId !== null"
+                                (click)="openEditTask(task)"
+                            ></button>
+
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-trash"
+                                class="p-button-rounded p-button-text p-button-danger"
+                                aria-label="Eliminar tarea"
+                                pTooltip="Eliminar tarea"
+                                tooltipPosition="top"
+                                [disabled]="movingTaskId !== null"
+                                (click)="confirmDeleteTask(task)"
+                            ></button>
+                        </div>
+                    </div>
+                </article>
+
+                <div
+                    *ngIf="column.tasks.length === 0"
+                    class="empty-column"
+                >
+                    Arrastra una tarea aqui
+                </div>
+            </div>
+
+            <button
+                pButton
+                label="Agregar tarea"
+                icon="pi pi-plus"
+                class="p-button-text w-full mt-3"
+                (click)="openCreateTask(column)"
+            ></button>
+        </section>
+    </div>
+</div>
+
+<p-dialog
+    [(visible)]="columnDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '32rem' }"
+    styleClass="scrum-dialog"
+    [breakpoints]="{ '960px': '70vw', '640px': '95vw' }"
+    [header]="editingColumnId ? 'Editar columna' : 'Nueva columna'"
+>
+    <form
+        id="column-form"
+        [formGroup]="columnForm"
+        (ngSubmit)="saveColumn()"
+        class="p-fluid scrum-form"
+    >
+        <div class="field">
+            <label for="columnName">Nombre</label>
+            <input id="columnName" pInputText formControlName="name">
+            <small
+                *ngIf="columnForm.controls.name.invalid && columnForm.controls.name.touched"
+                class="p-error"
+            >
+                El nombre es obligatorio.
+            </small>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="dialog-actions">
+            <button
+                pButton
+                type="button"
+                label="Cancelar"
+                icon="pi pi-times"
+                class="p-button-text"
+                (click)="columnDialogVisible = false"
+            ></button>
+            <button
+                pButton
+                type="submit"
+                form="column-form"
+                label="Guardar"
+                icon="pi pi-check"
+                [loading]="savingColumn"
+                [disabled]="savingColumn"
+            ></button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="taskDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '40rem' }"
+    styleClass="scrum-dialog"
+    [breakpoints]="{ '960px': '75vw', '640px': '95vw' }"
+    [header]="editingTaskId ? 'Editar tarea' : 'Nueva tarea'"
+>
+    <form
+        id="task-form"
+        [formGroup]="taskForm"
+        (ngSubmit)="saveTask()"
+        class="p-fluid scrum-form"
+    >
+        <div class="field">
+            <label for="taskTitle">Titulo</label>
+            <input id="taskTitle" pInputText formControlName="title">
+            <small
+                *ngIf="taskForm.controls.title.invalid && taskForm.controls.title.touched"
+                class="p-error"
+            >
+                El titulo es obligatorio.
+            </small>
+        </div>
+
+        <div class="field">
+            <label for="taskDescription">Descripcion</label>
+            <textarea
+                id="taskDescription"
+                pInputTextarea
+                formControlName="description"
+                rows="4"
+            ></textarea>
+        </div>
+
+        <div class="field">
+            <label for="taskPriority">Prioridad</label>
+            <p-dropdown
+                inputId="taskPriority"
+                formControlName="priority"
+                [options]="priorityOptions"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+            ></p-dropdown>
+        </div>
+
+        <div class="field">
+            <label for="taskUser">Responsable</label>
+            <p-dropdown
+                inputId="taskUser"
+                formControlName="assignedUserId"
+                [options]="users"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Sin responsable"
+                [showClear]="true"
+                appendTo="body"
+            ></p-dropdown>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="dialog-actions">
+            <button
+                pButton
+                type="button"
+                label="Cancelar"
+                icon="pi pi-times"
+                class="p-button-text"
+                (click)="taskDialogVisible = false"
+            ></button>
+            <button
+                pButton
+                type="submit"
+                form="task-form"
+                label="Guardar"
+                icon="pi pi-check"
+                [loading]="savingTask"
+                [disabled]="savingTask"
+            ></button>
+        </div>
+    </ng-template>
+</p-dialog>
