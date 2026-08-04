@@ -1,6 +1,5 @@
 import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import { LayoutService } from './service/app.layout.service';
 import { AuthService } from '../core/auth/auth.service';
 
 @Component({
@@ -11,7 +10,7 @@ export class AppMenuComponent implements OnInit {
 
     model: any[] = [];
 
-    constructor(public layoutService: LayoutService, private readonly authService: AuthService) { }
+    constructor(private readonly authService: AuthService) { }
 
     ngOnInit(): void {
         this.model = [

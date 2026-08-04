@@ -15,8 +15,6 @@ export class AppLayoutComponent implements OnDestroy {
 
     menuOutsideClickListener: any;
 
-    profileMenuOutsideClickListener: any;
-
     @ViewChild(AppSidebarComponent) appSidebar!: AppSidebarComponent;
 
     @ViewChild(AppTopBarComponent) appTopbar!: AppTopBarComponent;
@@ -34,17 +32,6 @@ export class AppLayoutComponent implements OnDestroy {
                 });
             }
 
-            if (!this.profileMenuOutsideClickListener) {
-                this.profileMenuOutsideClickListener = this.renderer.listen('document', 'click', event => {
-                    const isOutsideClicked = !(this.appTopbar.menu.nativeElement.isSameNode(event.target) || this.appTopbar.menu.nativeElement.contains(event.target)
-                        || this.appTopbar.topbarMenuButton.nativeElement.isSameNode(event.target) || this.appTopbar.topbarMenuButton.nativeElement.contains(event.target));
-
-                    if (isOutsideClicked) {
-                        this.hideProfileMenu();
-                    }
-                });
-            }
-
             if (this.layoutService.state.staticMenuMobileActive) {
                 this.blockBodyScroll();
             }
@@ -53,7 +40,6 @@ export class AppLayoutComponent implements OnDestroy {
         this.router.events.pipe(filter(event => event instanceof NavigationEnd))
             .subscribe(() => {
                 this.hideMenu();
-                this.hideProfileMenu();
             });
     }
 
@@ -66,14 +52,6 @@ export class AppLayoutComponent implements OnDestroy {
             this.menuOutsideClickListener = null;
         }
         this.unblockBodyScroll();
-    }
-
-    hideProfileMenu() {
-        this.layoutService.state.profileSidebarVisible = false;
-        if (this.profileMenuOutsideClickListener) {
-            this.profileMenuOutsideClickListener();
-            this.profileMenuOutsideClickListener = null;
-        }
     }
 
     blockBodyScroll(): void {
@@ -97,15 +75,11 @@ export class AppLayoutComponent implements OnDestroy {
 
     get containerClass() {
         return {
-            'layout-theme-light': this.layoutService.config().colorScheme === 'light',
-            'layout-theme-dark': this.layoutService.config().colorScheme === 'dark',
-            'layout-overlay': this.layoutService.config().menuMode === 'overlay',
-            'layout-static': this.layoutService.config().menuMode === 'static',
-            'layout-static-inactive': this.layoutService.state.staticMenuDesktopInactive && this.layoutService.config().menuMode === 'static',
+            'layout-theme-light': true,
+            'layout-static': true,
+            'layout-static-inactive': this.layoutService.state.staticMenuDesktopInactive,
             'layout-overlay-active': this.layoutService.state.overlayMenuActive,
-            'layout-mobile-active': this.layoutService.state.staticMenuMobileActive,
-            'p-input-filled': this.layoutService.config().inputStyle === 'filled',
-            'p-ripple-disabled': !this.layoutService.config().ripple
+            'layout-mobile-active': this.layoutService.state.staticMenuMobileActive
         }
     }
 

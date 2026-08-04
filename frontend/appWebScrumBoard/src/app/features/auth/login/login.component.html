@@ -1,0 +1,126 @@
+<div
+    class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden"
+>
+    <div class="flex flex-column align-items-center justify-content-center">
+        <img
+            src="assets/layout/images/logo-dark.svg"
+            alt="ScrumBoard"
+            class="mb-5 w-6rem flex-shrink-0"
+        >
+
+        <div
+            style="
+                border-radius: 56px;
+                padding: 0.3rem;
+                background:
+                    linear-gradient(
+                        180deg,
+                        var(--primary-color) 10%,
+                        rgba(33, 150, 243, 0) 30%
+                    );
+            "
+        >
+            <div
+                class="w-full surface-card py-8 px-5 sm:px-8"
+                style="border-radius: 53px"
+            >
+                <div class="text-center mb-5">
+                    <div class="text-900 text-3xl font-medium mb-3">
+                        ScrumBoard
+                    </div>
+
+                    <span class="text-600 font-medium">
+                        Inicia sesión para continuar
+                    </span>
+                </div>
+
+                <form
+                    [formGroup]="form"
+                    (ngSubmit)="submit()"
+                >
+                    <label
+                        for="email"
+                        class="block text-900 text-xl font-medium mb-2"
+                    >
+                        Correo
+                    </label>
+
+                    <input
+                        id="email"
+                        type="email"
+                        pInputText
+                        formControlName="email"
+                        placeholder="correo@ejemplo.com"
+                        autocomplete="username"
+                        class="w-full md:w-30rem"
+                        style="padding: 1rem"
+                    >
+
+                    <small
+                        *ngIf="
+                            form.controls.email.invalid &&
+                            form.controls.email.touched
+                        "
+                        class="block p-error mt-2 mb-4"
+                    >
+                        Ingresa un correo válido.
+                    </small>
+
+                    <div
+                        *ngIf="
+                            !form.controls.email.invalid ||
+                            !form.controls.email.touched
+                        "
+                        class="mb-4"
+                    ></div>
+
+                    <label
+                        for="password"
+                        class="block text-900 text-xl font-medium mb-2"
+                    >
+                        Contraseña
+                    </label>
+
+                    <p-password
+                        inputId="password"
+                        formControlName="password"
+                        placeholder="Contraseña"
+                        autocomplete="current-password"
+                        [feedback]="false"
+                        [toggleMask]="true"
+                        styleClass="w-full"
+                        inputStyleClass="w-full p-3 md:w-30rem"
+                    ></p-password>
+
+                    <small
+                        *ngIf="
+                            form.controls.password.invalid &&
+                            form.controls.password.touched
+                        "
+                        class="block p-error mt-2"
+                    >
+                        La contraseña es obligatoria.
+                    </small>
+
+                    <div
+                        *ngIf="errorMessage"
+                        class="p-3 mt-4 border-round bg-red-50 text-red-700"
+                    >
+                        {{ errorMessage }}
+                    </div>
+
+                    <button
+                        pButton
+                        pRipple
+                        type="submit"
+                        label="Iniciar sesión"
+                        icon="pi pi-sign-in"
+                        class="w-full p-3 text-xl mt-5"
+                        [loading]="loading"
+                        [disabled]="loading"
+                    ></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

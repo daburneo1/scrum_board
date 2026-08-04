@@ -1,8 +1,8 @@
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { NotfoundComponent } from './demo/components/notfound/notfound.component';
 import { AppLayoutComponent } from "./layout/app.layout.component";
 import {authChildGuard, authGuard} from "./core/auth/auth.guard";
+import {NotFoundComponent} from "./core/not-found/not-found.component";
 
 @NgModule({
     imports: [
@@ -32,12 +32,12 @@ import {authChildGuard, authGuard} from "./core/auth/auth.guard";
                     path: 'auth',
                     loadChildren: () =>
                         import(
-                            './demo/components/auth/auth.module'
+                            './features/auth/auth.module'
                             ).then(module => module.AuthModule)
                 },
                 {
                     path: 'notfound',
-                    component: NotfoundComponent
+                    component: NotFoundComponent
                 },
                 {
                     path: '**',
