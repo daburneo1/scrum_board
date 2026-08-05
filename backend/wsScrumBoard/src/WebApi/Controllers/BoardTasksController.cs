@@ -10,6 +10,28 @@ namespace WebApi.Controllers;
 [Route("api/projects/{projectId:guid}/tasks")]
 public sealed class BoardTasksController(BoardService boardService) : ControllerBase
 {
+    [HttpGet]
+    public Task<IReadOnlyCollection<BoardTaskDto>> GetAll(
+        Guid projectId,
+        CancellationToken cancellationToken)
+    {
+        return boardService.GetTasksAsync(
+            projectId,
+            cancellationToken);
+    }
+
+    [HttpGet("{taskId:guid}")]
+    public Task<BoardTaskDto> GetById(
+        Guid projectId,
+        Guid taskId,
+        CancellationToken cancellationToken)
+    {
+        return boardService.GetTaskAsync(
+            projectId,
+            taskId,
+            cancellationToken);
+    }
+
     [HttpPost]
     public Task<BoardTaskDto> Create(
         Guid projectId,

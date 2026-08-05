@@ -17,6 +17,28 @@ public sealed class ColumnsController : ControllerBase
         _boardService = boardService;
     }
 
+    [HttpGet]
+    public Task<IReadOnlyCollection<BoardColumnDto>> GetAll(
+        Guid projectId,
+        CancellationToken cancellationToken)
+    {
+        return _boardService.GetColumnsAsync(
+            projectId,
+            cancellationToken);
+    }
+
+    [HttpGet("{columnId:guid}")]
+    public Task<BoardColumnDto> GetById(
+        Guid projectId,
+        Guid columnId,
+        CancellationToken cancellationToken)
+    {
+        return _boardService.GetColumnAsync(
+            projectId,
+            columnId,
+            cancellationToken);
+    }
+
     [HttpPost]
     public async Task<ActionResult<BoardColumnDto>> Create(
         Guid projectId,

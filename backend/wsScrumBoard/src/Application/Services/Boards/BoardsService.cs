@@ -39,6 +39,59 @@ public sealed class BoardService(
             cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<BoardColumnDto>> GetColumnsAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default)
+    {
+        var board = await GetBoardAsync(
+            projectId,
+            ProjectTaskFilter.Empty,
+            cancellationToken);
+
+        return board.Columns;
+    }
+
+    public async Task<BoardColumnDto> GetColumnAsync(
+        Guid projectId,
+        Guid columnId,
+        CancellationToken cancellationToken = default)
+    {
+        var columns = await GetColumnsAsync(
+            projectId,
+            cancellationToken);
+
+        return columns.SingleOrDefault(column => column.Id == columnId)
+               ?? throw new NotFoundException(
+                   "No se encontró la columna solicitada.");
+    }
+
+    public async Task<IReadOnlyCollection<BoardTaskDto>> GetTasksAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default)
+    {
+        var columns = await GetColumnsAsync(
+            projectId,
+            cancellationToken);
+
+        return columns
+            .SelectMany(column => column.Tasks)
+            .ToArray();
+    }
+
+    public async Task<BoardTaskDto> GetTaskAsync(
+        Guid projectId,
+        Guid taskId,
+        CancellationToken cancellationToken = default)
+    {
+        var tasks = await GetTasksAsync(
+            projectId,
+            cancellationToken);
+
+        return tasks.SingleOrDefault(task => task.Id == taskId)
+               ?? throw new NotFoundException(
+                   "No se encontró la tarea.");
+    }
+
     public async Task<BoardColumnDto> CreateColumnAsync(
         Guid projectId,
         CreateColumnRequest request,
