@@ -1,0 +1,260 @@
+:host {
+    display: block;
+}
+
+.scrum-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--scrum-surface-muted);
+}
+
+.scrum-login-shell {
+    width: min(68rem, 100%);
+    min-height: 42rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(24rem, .95fr);
+    overflow: hidden;
+    border: 1px solid var(--scrum-border);
+    border-radius: 18px;
+    background: var(--scrum-surface);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+}
+
+.scrum-login-brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3.5rem;
+    background: var(--scrum-primary-soft);
+    border-right: 1px solid var(--scrum-border);
+}
+
+.scrum-login-logo {
+    width: min(19rem, 80%);
+    height: auto;
+    display: block;
+    margin-bottom: 2.5rem;
+}
+
+.scrum-login-brand-copy {
+    max-width: 33rem;
+
+    h2 {
+        margin: 0;
+        color: var(--scrum-text);
+        font-size: 1.75rem;
+        letter-spacing: -.02em;
+    }
+
+    p {
+        margin: .8rem 0 0;
+        color: var(--scrum-text-muted);
+        font-size: 1.05rem;
+        line-height: 1.65;
+    }
+}
+
+.scrum-login-benefits {
+    display: grid;
+    gap: .85rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    color: var(--scrum-text);
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+
+    i {
+        width: 1.65rem;
+        height: 1.65rem;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--scrum-surface);
+        color: var(--scrum-primary);
+        font-size: .75rem;
+    }
+}
+
+.scrum-login-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3.5rem;
+}
+
+.scrum-login-header {
+    margin-bottom: 2rem;
+
+    > span {
+        color: var(--scrum-primary);
+        font-size: .82rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        margin: .55rem 0 0;
+        color: var(--scrum-text);
+        font-size: 2rem;
+        letter-spacing: -.025em;
+    }
+
+    p {
+        margin: .55rem 0 0;
+        color: var(--scrum-text-muted);
+        line-height: 1.5;
+    }
+}
+
+.scrum-login-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.scrum-login-field {
+    display: grid;
+    gap: .5rem;
+
+    label {
+        color: var(--scrum-text);
+        font-weight: 600;
+    }
+
+    .p-input-icon-left,
+    input {
+        width: 100%;
+    }
+
+    input {
+        min-height: 3.25rem;
+    }
+
+    .p-error {
+        line-height: 1.35;
+    }
+}
+
+.scrum-login-error {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    padding: .85rem 1rem;
+    border: 1px solid var(--red-100);
+    border-radius: var(--scrum-radius);
+    background: var(--red-50);
+    color: var(--red-700);
+    line-height: 1.4;
+}
+
+.scrum-login-submit.p-button {
+    min-height: 3.25rem;
+    justify-content: center;
+    margin-top: .25rem;
+    font-weight: 700;
+}
+
+.scrum-login-submit.p-button:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.scrum-login-security {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    margin: 1.5rem 0 0;
+    color: var(--scrum-text-muted);
+    font-size: .8rem;
+    text-align: center;
+}
+
+/* p-password renders its input and toggle icon internally. */
+:host ::ng-deep .scrum-login-password {
+    width: 100%;
+
+    .p-password-input {
+        width: 100%;
+        min-height: 3.25rem;
+        padding-right: 3rem;
+    }
+
+    .p-password-toggle-mask-icon,
+    .p-password-show-icon,
+    .p-password-hide-icon {
+        right: 1rem;
+        color: var(--scrum-text-muted);
+    }
+}
+
+@media (max-width: 900px) {
+    .scrum-login-shell {
+        width: min(36rem, 100%);
+        min-height: auto;
+        grid-template-columns: 1fr;
+    }
+
+    .scrum-login-brand {
+        align-items: center;
+        padding: 2rem 2.5rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--scrum-border);
+        text-align: center;
+    }
+
+    .scrum-login-logo {
+        width: 13rem;
+        margin-bottom: 1rem;
+    }
+
+    .scrum-login-brand-copy h2,
+    .scrum-login-benefits {
+        display: none;
+    }
+
+    .scrum-login-brand-copy p {
+        margin-top: 0;
+        font-size: .95rem;
+    }
+
+    .scrum-login-panel {
+        padding: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .scrum-login-page {
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .scrum-login-shell {
+        border-radius: 14px;
+    }
+
+    .scrum-login-brand {
+        padding: 1.5rem;
+    }
+
+    .scrum-login-brand-copy {
+        display: none;
+    }
+
+    .scrum-login-panel {
+        padding: 2rem 1.25rem;
+    }
+
+    .scrum-login-header h1 {
+        font-size: 1.75rem;
+    }
+}

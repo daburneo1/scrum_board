@@ -133,3 +133,113 @@
         }
     }
 }
+
+/* Compact application navigation */
+.layout-sidebar {
+    top: $topbarHeight;
+    left: 0;
+    width: $sidebarWidth;
+    height: calc(100vh - #{$topbarHeight});
+    padding: 1.25rem .85rem 1rem;
+    background: var(--scrum-surface);
+    border-right: 1px solid var(--scrum-border);
+    border-radius: 0;
+    box-shadow: none;
+    transition: transform $transitionDuration;
+
+    app-sidebar,
+    app-menu {
+        display: block;
+        height: 100%;
+    }
+}
+
+.layout-sidebar-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    > .layout-menuitem-root-text {
+        margin: 0 .75rem .75rem;
+        color: var(--scrum-text-muted);
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+}
+
+.layout-menu-link {
+    position: relative;
+    width: 100%;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .75rem .9rem;
+    color: var(--scrum-text);
+    border-radius: var(--scrum-radius);
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: color $transitionDuration, background-color $transitionDuration, box-shadow $transitionDuration;
+
+    .layout-menuitem-icon {
+        width: 1.25rem;
+        color: var(--scrum-text-muted);
+        font-size: 1.05rem;
+        text-align: center;
+        transition: color $transitionDuration;
+    }
+
+    &:hover {
+        color: var(--scrum-primary);
+        background: var(--scrum-primary-soft);
+
+        .layout-menuitem-icon {
+            color: var(--scrum-primary);
+        }
+    }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: var(--focus-ring);
+    }
+
+    &.active-route {
+        color: var(--scrum-primary);
+        background: var(--scrum-primary-soft);
+        font-weight: 700;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: .65rem;
+            bottom: .65rem;
+            left: 0;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: var(--scrum-primary);
+        }
+
+        .layout-menuitem-icon {
+            color: var(--scrum-primary);
+        }
+    }
+}
+
+.layout-sidebar-session {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--scrum-border);
+}
+
+.layout-logout-button:hover {
+    color: var(--scrum-danger);
+    background: var(--red-50);
+
+    .layout-menuitem-icon {
+        color: var(--scrum-danger);
+    }
+}

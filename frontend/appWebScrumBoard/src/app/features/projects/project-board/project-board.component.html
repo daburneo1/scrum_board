@@ -4,44 +4,49 @@
     {{ errorMessage }}
 </div>
 
-<div *ngIf="board" class="board-page">
-    <div class="board-header">
-        <div class="board-title-block">
-            <div class="board-title-row">
-                <h2>{{ board.projectName }}</h2>
+<div *ngIf="board" class="scrum-board">
+    <div class="scrum-board-header">
+        <div class="scrum-board-title">
+            <a class="scrum-board-back" routerLink="/projects">
+                <i class="pi pi-arrow-left" aria-hidden="true"></i>
+                <span>Volver a proyectos</span>
+            </a>
+
+            <div class="scrum-board-title-row">
+                <h1>{{ board.projectName }}</h1>
 
                 <ng-container *ngIf="realtimeState$ | async as realtimeState">
                     <ng-container *ngIf="presence$ | async as presence">
                         <div
-                            class="presence-indicator"
-                            [class.presence-connected]="realtimeState === 'connected'"
-                            [class.presence-pending]="realtimeState === 'connecting' || realtimeState === 'reconnecting'"
-                            [class.presence-disconnected]="realtimeState === 'disconnected'"
+                            class="scrum-connection-status"
+                            [class.scrum-connection-connected]="realtimeState === 'connected'"
+                            [class.scrum-connection-pending]="realtimeState === 'connecting' || realtimeState === 'reconnecting'"
+                            [class.scrum-connection-disconnected]="realtimeState === 'disconnected'"
                             [pTooltip]="getPresenceTooltip(presence)"
+                            [attr.aria-label]="getRealtimeLabel(realtimeState) + '. ' + getPresenceLabel(presence)"
                             tooltipPosition="top"
+                            role="status"
                         >
-                            <span class="presence-status-dot"></span>
-                            <span>
-                                {{ getRealtimeLabel(realtimeState) }}
-                                ·
-                                {{ getPresenceLabel(presence) }}
-                            </span>
+                            <span class="scrum-connection-dot"></span>
+                            <span>{{ getRealtimeLabel(realtimeState) }}</span>
+                            <span class="scrum-connection-separator" aria-hidden="true">·</span>
+                            <span>{{ getPresenceLabel(presence) }}</span>
 
                             <span
                                 *ngIf="presence.users.length > 0"
-                                class="presence-avatars"
+                                class="scrum-presence-avatars"
                                 aria-hidden="true"
                             >
                                 <span
                                     *ngFor="let user of getVisiblePresenceUsers(presence)"
-                                    class="presence-avatar"
+                                    class="scrum-presence-avatar"
                                 >
                                     {{ getPresenceInitials(user) }}
                                 </span>
 
                                 <span
                                     *ngIf="getRemainingPresenceUserCount(presence) > 0"
-                                    class="presence-avatar presence-avatar-extra"
+                                    class="scrum-presence-avatar scrum-presence-avatar-extra"
                                 >
                                     +{{ getRemainingPresenceUserCount(presence) }}
                                 </span>
@@ -54,7 +59,7 @@
             <span>Tablero del proyecto</span>
         </div>
 
-        <div class="board-actions">
+        <div class="scrum-board-actions">
             <button
                 pButton
                 type="button"
@@ -92,7 +97,7 @@
     </div>
 
     <form
-        class="board-filters"
+        class="scrum-board-filters"
         [formGroup]="filterForm"
     >
         <span class="p-input-icon-left">
@@ -138,34 +143,34 @@
 
     <p
         *ngIf="hasActiveFilters()"
-        class="drag-disabled-message"
+        class="scrum-drag-disabled-message"
         role="status"
         aria-live="polite"
     >
         Limpia los filtros para reordenar tareas.
     </p>
 
-    <div class="board-container" cdkDropListGroup>
+    <div class="scrum-board-container" cdkDropListGroup>
         <section
             *ngFor="
                 let column of board.columns;
                 let index = index;
                 trackBy: trackColumnById
             "
-            class="board-column"
+            class="scrum-column"
         >
-            <header class="column-header">
-                <div class="column-title">
+            <header class="scrum-column-header">
+                <div class="scrum-column-title">
                     <strong>{{ column.name }}</strong>
                     <span>{{ column.tasks.length }}</span>
                 </div>
 
-                <div class="column-actions">
+                <div class="scrum-column-actions">
                     <button
                         pButton
                         type="button"
                         icon="pi pi-angle-left"
-                        class="p-button-rounded p-button-text"
+                        class="p-button-rounded p-button-text p-button-sm scrum-column-action"
                         aria-label="Mover columna a la izquierda"
                         pTooltip="Mover a la izquierda"
                         tooltipPosition="top"
@@ -177,7 +182,7 @@
                         pButton
                         type="button"
                         icon="pi pi-angle-right"
-                        class="p-button-rounded p-button-text"
+                        class="p-button-rounded p-button-text p-button-sm scrum-column-action"
                         aria-label="Mover columna a la derecha"
                         pTooltip="Mover a la derecha"
                         tooltipPosition="top"
@@ -189,7 +194,7 @@
                         pButton
                         type="button"
                         icon="pi pi-pencil"
-                        class="p-button-rounded p-button-text"
+                        class="p-button-rounded p-button-text p-button-sm scrum-column-action"
                         aria-label="Editar columna"
                         pTooltip="Editar columna"
                         tooltipPosition="top"
@@ -200,7 +205,7 @@
                         pButton
                         type="button"
                         icon="pi pi-trash"
-                        class="p-button-rounded p-button-text p-button-danger"
+                        class="p-button-rounded p-button-text p-button-danger p-button-sm scrum-column-action"
                         aria-label="Eliminar columna"
                         pTooltip="Eliminar columna"
                         tooltipPosition="top"
@@ -210,8 +215,8 @@
             </header>
 
             <div
-                class="task-list"
-                [class.task-list-disabled]="hasActiveFilters()"
+                class="scrum-task-list"
+                [class.scrum-task-list-disabled]="hasActiveFilters()"
                 cdkDropList
                 [id]="column.id"
                 [cdkDropListData]="column.tasks"
@@ -223,22 +228,25 @@
                         let task of column.tasks;
                         trackBy: trackTaskById
                     "
-                    class="task-card"
-                    [class.task-card-disabled]="hasActiveFilters()"
+                    class="scrum-task-card"
+                    [class.scrum-task-card-disabled]="hasActiveFilters()"
+                    tabindex="0"
                     cdkDrag
                     [cdkDragData]="task"
                     [cdkDragDisabled]="movingTaskId !== null || hasActiveFilters()"
                 >
-                    <div class="task-card-header">
-                        <div class="task-title">
-                            <span
+                    <div class="scrum-task-card-header">
+                        <div class="scrum-task-title">
+                            <button
+                                type="button"
                                 cdkDragHandle
-                                class="drag-handle"
+                                class="p-link scrum-drag-handle"
                                 aria-label="Arrastrar tarea"
-                                title="Arrastrar tarea"
+                                pTooltip="Arrastrar tarea"
+                                tooltipPosition="top"
                             >
-                                <i class="pi pi-bars"></i>
-                            </span>
+                                <i class="pi pi-bars" aria-hidden="true"></i>
+                            </button>
 
                             <strong>{{ task.title }}</strong>
                         </div>
@@ -246,28 +254,28 @@
                         <p-tag
                             [value]="getPriorityLabel(task.priority)"
                             [severity]="getPrioritySeverity(task.priority)"
+                            [styleClass]="getPriorityClass(task.priority)"
                         ></p-tag>
                     </div>
 
-                    <p class="task-description">
-                        {{ task.description || 'Sin descripcion' }}
+                    <p class="scrum-task-description">
+                        {{ task.description || 'Sin descripción' }}
                     </p>
 
-                    <div class="task-footer">
-                        <small>
-                            <i class="pi pi-user mr-1"></i>
-                            {{
-                                task.assignedUserName ||
-                                'Sin responsable'
-                            }}
-                        </small>
+                    <div class="scrum-task-footer">
+                        <div class="scrum-task-assignee">
+                            <span class="scrum-assignee-avatar" aria-hidden="true">
+                                <i class="pi pi-user"></i>
+                            </span>
+                            <span>{{ task.assignedUserName || 'Sin responsable' }}</span>
+                        </div>
 
-                        <div class="task-actions">
+                        <div class="scrum-task-actions">
                             <button
                                 pButton
                                 type="button"
                                 icon="pi pi-pencil"
-                                class="p-button-rounded p-button-text"
+                                class="p-button-rounded p-button-text p-button-sm scrum-task-edit"
                                 aria-label="Editar tarea"
                                 pTooltip="Editar tarea"
                                 tooltipPosition="top"
@@ -279,7 +287,7 @@
                                 pButton
                                 type="button"
                                 icon="pi pi-trash"
-                                class="p-button-rounded p-button-text p-button-danger"
+                                class="p-button-rounded p-button-text p-button-danger p-button-sm scrum-task-delete"
                                 aria-label="Eliminar tarea"
                                 pTooltip="Eliminar tarea"
                                 tooltipPosition="top"
@@ -292,17 +300,28 @@
 
                 <div
                     *ngIf="column.tasks.length === 0"
-                    class="empty-column"
+                    class="scrum-column-empty"
                 >
-                    Arrastra una tarea aqui
+                    <i class="pi pi-inbox" aria-hidden="true"></i>
+                    <span>Arrastra una tarea aquí</span>
+                    <button
+                        pButton
+                        type="button"
+                        label="Agregar tarea"
+                        icon="pi pi-plus"
+                        class="p-button-text p-button-sm"
+                        (click)="openCreateTask(column)"
+                    ></button>
                 </div>
             </div>
 
             <button
+                *ngIf="column.tasks.length > 0"
                 pButton
+                type="button"
                 label="Agregar tarea"
                 icon="pi pi-plus"
-                class="p-button-text w-full mt-3"
+                class="scrum-column-add-task mt-3"
                 (click)="openCreateTask(column)"
             ></button>
         </section>
@@ -366,47 +385,81 @@
     [draggable]="false"
     [resizable]="false"
     [style]="{ width: '40rem' }"
-    styleClass="scrum-dialog"
-    [breakpoints]="{ '960px': '75vw', '640px': '95vw' }"
+    styleClass="scrum-dialog scrum-task-dialog"
+    [breakpoints]="{ '960px': '75vw', '640px': 'calc(100vw - 2rem)' }"
     [header]="editingTaskId ? 'Editar tarea' : 'Nueva tarea'"
 >
     <form
         id="task-form"
         [formGroup]="taskForm"
         (ngSubmit)="saveTask()"
-        class="p-fluid scrum-form"
+        class="p-fluid scrum-form scrum-task-form"
     >
+        <p class="scrum-dialog-help">
+            Completa los detalles de la tarea. Los campos marcados con * son obligatorios.
+        </p>
+
         <div class="field">
-            <label for="taskTitle">Titulo</label>
-            <input id="taskTitle" pInputText formControlName="title">
+            <label for="taskTitle">
+                Título
+                <span class="scrum-required" aria-hidden="true">*</span>
+            </label>
+            <input
+                id="taskTitle"
+                pInputText
+                formControlName="title"
+                aria-required="true"
+            >
             <small
-                *ngIf="taskForm.controls.title.invalid && taskForm.controls.title.touched"
+                *ngIf="taskForm.controls.title.hasError('required') && taskForm.controls.title.touched"
                 class="p-error"
             >
-                El titulo es obligatorio.
+                El título es obligatorio.
+            </small>
+            <small
+                *ngIf="taskForm.controls.title.hasError('maxlength') && taskForm.controls.title.touched"
+                class="p-error"
+            >
+                El título no puede superar los 200 caracteres.
             </small>
         </div>
 
         <div class="field">
-            <label for="taskDescription">Descripcion</label>
+            <label for="taskDescription">Descripción</label>
             <textarea
                 id="taskDescription"
                 pInputTextarea
                 formControlName="description"
                 rows="4"
             ></textarea>
+            <small
+                *ngIf="taskForm.controls.description.hasError('maxlength') && taskForm.controls.description.touched"
+                class="p-error"
+            >
+                La descripción no puede superar los 2000 caracteres.
+            </small>
         </div>
 
         <div class="field">
-            <label for="taskPriority">Prioridad</label>
+            <label for="taskPriority">
+                Prioridad
+                <span class="scrum-required" aria-hidden="true">*</span>
+            </label>
             <p-dropdown
                 inputId="taskPriority"
                 formControlName="priority"
+                ariaLabel="Prioridad de la tarea"
                 [options]="priorityOptions"
                 optionLabel="label"
                 optionValue="value"
                 appendTo="body"
             ></p-dropdown>
+            <small
+                *ngIf="taskForm.controls.priority.invalid && taskForm.controls.priority.touched"
+                class="p-error"
+            >
+                La prioridad es obligatoria.
+            </small>
         </div>
 
         <div class="field">
@@ -414,6 +467,7 @@
             <p-dropdown
                 inputId="taskUser"
                 formControlName="assignedUserId"
+                ariaLabel="Responsable de la tarea"
                 [options]="users"
                 optionLabel="name"
                 optionValue="id"

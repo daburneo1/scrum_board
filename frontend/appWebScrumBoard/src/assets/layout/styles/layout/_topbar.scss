@@ -170,3 +170,133 @@
         }
     }
 }
+
+/* ScrumBoard application bar */
+.layout-topbar {
+    z-index: 1000;
+    height: $topbarHeight;
+    padding: 0 1.5rem;
+    background: var(--scrum-surface);
+    border-bottom: 1px solid var(--scrum-border);
+    box-shadow: var(--scrum-shadow);
+
+    .layout-topbar-start,
+    .layout-user {
+        display: flex;
+        align-items: center;
+    }
+
+    .layout-topbar-start {
+        min-width: 0;
+        gap: .65rem;
+    }
+
+    .layout-topbar-logo {
+        width: auto;
+        min-width: 0;
+        gap: .7rem;
+        color: var(--scrum-text);
+        border-radius: var(--scrum-radius);
+        font-size: 1.2rem;
+        letter-spacing: -.01em;
+
+        img {
+            width: auto;
+            height: 2.35rem;
+            max-width: 3rem;
+            margin-right: 0;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--scrum-primary);
+            outline-offset: .25rem;
+            box-shadow: none;
+        }
+    }
+
+    .layout-topbar-button {
+        width: 2.75rem;
+        height: 2.75rem;
+        flex: 0 0 auto;
+        color: var(--scrum-text-muted);
+        border-radius: var(--scrum-radius);
+        transition: color $transitionDuration, background-color $transitionDuration, box-shadow $transitionDuration;
+
+        &:hover {
+            color: var(--scrum-primary);
+            background: var(--scrum-primary-soft);
+        }
+
+        &:focus-visible {
+            outline: 0;
+            box-shadow: var(--focus-ring);
+        }
+    }
+
+    .layout-menu-button {
+        margin-left: 0;
+    }
+
+    .layout-user {
+        min-width: 0;
+        margin-left: auto;
+        gap: .75rem;
+    }
+
+    .layout-user-copy {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        line-height: 1.25;
+    }
+
+    .layout-user-name,
+    .layout-user-email {
+        max-width: 18rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .layout-user-name {
+        color: var(--scrum-text);
+        font-weight: 600;
+    }
+
+    .layout-user-email {
+        margin-top: .15rem;
+        color: var(--scrum-text-muted);
+        font-size: .82rem;
+    }
+
+    .layout-user-avatar {
+        width: 2.4rem;
+        height: 2.4rem;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--scrum-primary-soft);
+        color: var(--scrum-primary);
+        font-size: .85rem;
+        font-weight: 700;
+    }
+}
+
+@media (max-width: 640px) {
+    .layout-topbar {
+        padding: 0 .9rem;
+
+        .layout-user-copy {
+            display: none;
+        }
+    }
+}
+
+@media (max-width: 380px) {
+    .layout-topbar .layout-topbar-logo span {
+        display: none;
+    }
+}

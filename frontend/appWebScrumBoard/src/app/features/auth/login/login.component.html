@@ -1,126 +1,128 @@
-<div
-    class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden"
->
-    <div class="flex flex-column align-items-center justify-content-center">
-        <img
-            src="assets/layout/images/logo-dark.svg"
-            alt="ScrumBoard"
-            class="mb-5 w-6rem flex-shrink-0"
-        >
-
-        <div
-            style="
-                border-radius: 56px;
-                padding: 0.3rem;
-                background:
-                    linear-gradient(
-                        180deg,
-                        var(--primary-color) 10%,
-                        rgba(33, 150, 243, 0) 30%
-                    );
-            "
-        >
-            <div
-                class="w-full surface-card py-8 px-5 sm:px-8"
-                style="border-radius: 53px"
+<main class="scrum-login-page">
+    <section class="scrum-login-shell" aria-labelledby="login-title">
+        <div class="scrum-login-brand">
+            <img
+                src="assets/layout/images/logo_dark.png"
+                alt="Logo de ScrumBoard"
+                class="scrum-login-logo"
             >
-                <div class="text-center mb-5">
-                    <div class="text-900 text-3xl font-medium mb-3">
-                        ScrumBoard
-                    </div>
 
-                    <span class="text-600 font-medium">
-                        Inicia sesión para continuar
+            <div class="scrum-login-brand-copy">
+                <h2>Tu trabajo ágil, en un solo lugar</h2>
+                <p>
+                    Organiza proyectos, prioriza tareas y mantén a tu equipo
+                    conectado con tableros de trabajo claros.
+                </p>
+            </div>
+
+            <ul class="scrum-login-benefits" aria-label="Funciones principales">
+                <li>
+                    <i class="pi pi-check" aria-hidden="true"></i>
+                    <span>Proyectos y tableros Kanban</span>
+                </li>
+                <li>
+                    <i class="pi pi-check" aria-hidden="true"></i>
+                    <span>Colaboración en tiempo real</span>
+                </li>
+                <li>
+                    <i class="pi pi-check" aria-hidden="true"></i>
+                    <span>Seguimiento simple y ordenado</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="scrum-login-panel">
+            <header class="scrum-login-header">
+                <span>Acceso a ScrumBoard</span>
+                <h1 id="login-title">Inicia sesión</h1>
+                <p>Ingresa tus credenciales para continuar.</p>
+            </header>
+
+            <form
+                class="scrum-login-form p-fluid"
+                [formGroup]="form"
+                (ngSubmit)="submit()"
+                novalidate
+            >
+                <div class="scrum-login-field">
+                    <label for="email">Correo electrónico</label>
+
+                    <span class="p-input-icon-left">
+                        <i class="pi pi-envelope" aria-hidden="true"></i>
+                        <input
+                            id="email"
+                            type="email"
+                            pInputText
+                            formControlName="email"
+                            placeholder="correo@ejemplo.com"
+                            autocomplete="username"
+                            required
+                            aria-required="true"
+                            [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+                            [attr.aria-describedby]="form.controls.email.invalid && form.controls.email.touched ? 'email-error' : null"
+                        >
                     </span>
-                </div>
-
-                <form
-                    [formGroup]="form"
-                    (ngSubmit)="submit()"
-                >
-                    <label
-                        for="email"
-                        class="block text-900 text-xl font-medium mb-2"
-                    >
-                        Correo
-                    </label>
-
-                    <input
-                        id="email"
-                        type="email"
-                        pInputText
-                        formControlName="email"
-                        placeholder="correo@ejemplo.com"
-                        autocomplete="username"
-                        class="w-full md:w-30rem"
-                        style="padding: 1rem"
-                    >
 
                     <small
-                        *ngIf="
-                            form.controls.email.invalid &&
-                            form.controls.email.touched
-                        "
-                        class="block p-error mt-2 mb-4"
+                        *ngIf="form.controls.email.invalid && form.controls.email.touched"
+                        id="email-error"
+                        class="p-error"
                     >
-                        Ingresa un correo válido.
+                        Ingresa un correo electrónico válido.
                     </small>
+                </div>
 
-                    <div
-                        *ngIf="
-                            !form.controls.email.invalid ||
-                            !form.controls.email.touched
-                        "
-                        class="mb-4"
-                    ></div>
-
-                    <label
-                        for="password"
-                        class="block text-900 text-xl font-medium mb-2"
-                    >
-                        Contraseña
-                    </label>
+                <div class="scrum-login-field">
+                    <label for="password">Contraseña</label>
 
                     <p-password
                         inputId="password"
                         formControlName="password"
-                        placeholder="Contraseña"
+                        placeholder="Ingresa tu contraseña"
                         autocomplete="current-password"
+                        ariaLabel="Contraseña"
+                        [required]="true"
                         [feedback]="false"
                         [toggleMask]="true"
-                        styleClass="w-full"
-                        inputStyleClass="w-full p-3 md:w-30rem"
+                        styleClass="scrum-login-password"
+                        inputStyleClass="w-full"
                     ></p-password>
 
                     <small
-                        *ngIf="
-                            form.controls.password.invalid &&
-                            form.controls.password.touched
-                        "
-                        class="block p-error mt-2"
+                        *ngIf="form.controls.password.invalid && form.controls.password.touched"
+                        id="password-error"
+                        class="p-error"
                     >
                         La contraseña es obligatoria.
                     </small>
+                </div>
 
-                    <div
-                        *ngIf="errorMessage"
-                        class="p-3 mt-4 border-round bg-red-50 text-red-700"
-                    >
-                        {{ errorMessage }}
-                    </div>
+                <div
+                    *ngIf="errorMessage"
+                    class="scrum-login-error"
+                    role="alert"
+                    aria-live="assertive"
+                >
+                    <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+                    <span>{{ errorMessage }}</span>
+                </div>
 
-                    <button
-                        pButton
-                        pRipple
-                        type="submit"
-                        label="Iniciar sesión"
-                        icon="pi pi-sign-in"
-                        class="w-full p-3 text-xl mt-5"
-                        [loading]="loading"
-                        [disabled]="loading"
-                    ></button>
-                </form>
-            </div>
+                <button
+                    pButton
+                    pRipple
+                    type="submit"
+                    label="Iniciar sesión"
+                    icon="pi pi-sign-in"
+                    class="scrum-login-submit"
+                    [loading]="loading"
+                    [disabled]="loading"
+                ></button>
+            </form>
+
+            <p class="scrum-login-security">
+                <i class="pi pi-lock" aria-hidden="true"></i>
+                Acceso protegido a tu espacio de trabajo
+            </p>
         </div>
-    </div>
-</div>
+    </section>
+</main>

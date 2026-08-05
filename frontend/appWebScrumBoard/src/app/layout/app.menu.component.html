@@ -1,7 +1,24 @@
-<ul class="layout-menu">
-    <ng-container *ngFor="let item of model; let i = index;">
-        <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
-        <li *ngIf="item.separator" class="menu-separator"></li>
-    </ng-container>
+<nav class="layout-sidebar-content" aria-label="Navegación principal">
+    <div class="layout-menuitem-root-text">ScrumBoard</div>
 
-</ul>
+    <a
+        class="layout-menu-link"
+        routerLink="/projects"
+        routerLinkActive="active-route"
+        [routerLinkActiveOptions]="{ exact: false }"
+    >
+        <i class="pi pi-folder layout-menuitem-icon" aria-hidden="true"></i>
+        <span>Proyectos</span>
+    </a>
+
+    <div class="layout-sidebar-session">
+        <button
+            type="button"
+            class="p-link layout-menu-link layout-logout-button"
+            (click)="logout()"
+        >
+            <i class="pi pi-sign-out layout-menuitem-icon" aria-hidden="true"></i>
+            <span>Cerrar sesión</span>
+        </button>
+    </div>
+</nav>

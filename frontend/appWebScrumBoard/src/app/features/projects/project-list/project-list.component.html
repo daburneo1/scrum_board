@@ -1,83 +1,100 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<div class="card project-list-page">
-    <div class="project-list-heading">
+<section class="project-list-page">
+    <header class="project-page-header">
         <div>
-            <h2>Proyectos</h2>
-            <span>Administra tus tableros ScrumBoard.</span>
+            <h1>Proyectos</h1>
+            <p>Administra tus proyectos y accede a sus tableros de trabajo.</p>
         </div>
-    </div>
 
-    <p-toolbar styleClass="project-list-toolbar">
-        <ng-template pTemplate="left">
-            <button
-                pButton
-                pRipple
-                type="button"
-                label="Nuevo proyecto"
-                icon="pi pi-plus"
-                class="p-button-success"
-                (click)="openCreate()"
-            ></button>
-        </ng-template>
+        <button
+            pButton
+            pRipple
+            type="button"
+            label="Nuevo proyecto"
+            icon="pi pi-plus"
+            (click)="openCreate()"
+        ></button>
+    </header>
 
-        <ng-template pTemplate="right">
-            <span class="p-input-icon-left">
-                <i class="pi pi-search"></i>
+    <div class="card project-table-card">
+        <div class="project-table-tools">
+            <div class="project-search-field">
+                <label for="project-search">Buscar proyectos</label>
 
-                <input
-                    pInputText
-                    type="text"
-                    [formControl]="filterControl"
-                    placeholder="Buscar por nombre"
-                >
-            </span>
-        </ng-template>
-    </p-toolbar>
+                <div class="project-search-control">
+                    <span class="p-input-icon-left">
+                        <i class="pi pi-search"></i>
 
-    <p-table
-        [value]="projects"
-        [lazy]="true"
-        [paginator]="true"
-        [rows]="pageSize"
-        [first]="first"
-        [totalRecords]="totalRecords"
-        [loading]="loading"
-        [rowsPerPageOptions]="[5, 10, 20, 50]"
-        styleClass="project-table p-datatable-sm"
-        responsiveLayout="scroll"
-        (onLazyLoad)="onLazyLoad($event)"
-    >
-        <ng-template pTemplate="header">
+                        <input
+                            id="project-search"
+                            pInputText
+                            type="text"
+                            [formControl]="filterControl"
+                            placeholder="Buscar por nombre"
+                            aria-label="Buscar proyectos por nombre"
+                        >
+                    </span>
+
+                    <button
+                        *ngIf="filterControl.value"
+                        pButton
+                        pRipple
+                        type="button"
+                        icon="pi pi-times"
+                        class="p-button-rounded p-button-text p-button-sm project-search-clear"
+                        aria-label="Limpiar búsqueda"
+                        pTooltip="Limpiar búsqueda"
+                        tooltipPosition="top"
+                        (click)="clearSearch()"
+                    ></button>
+                </div>
+            </div>
+        </div>
+
+        <p-table
+            [value]="projects"
+            [lazy]="true"
+            [paginator]="true"
+            [rows]="pageSize"
+            [first]="first"
+            [totalRecords]="totalRecords"
+            [loading]="loading"
+            [rowsPerPageOptions]="[5, 10, 20, 50]"
+            styleClass="project-table p-datatable-sm"
+            responsiveLayout="scroll"
+            (onLazyLoad)="onLazyLoad($event)"
+        >
+            <ng-template pTemplate="header">
             <tr>
                 <th>Nombre</th>
-                <th>Descripcion</th>
-                <th>Inicio</th>
-                <th>Fin previsto</th>
+                <th>Descripción</th>
+                <th class="project-date-column">Inicio</th>
+                <th class="project-date-column">Fin previsto</th>
                 <th>Estado</th>
-                <th style="width: 14rem">Acciones</th>
+                <th class="project-actions-column">Acciones</th>
             </tr>
-        </ng-template>
+            </ng-template>
 
-        <ng-template
-            pTemplate="body"
-            let-project
-        >
+            <ng-template
+                pTemplate="body"
+                let-project
+            >
             <tr>
                 <td>
                     <div class="project-name">{{ project.name }}</div>
                 </td>
 
                 <td>
-                    <span class="project-description">{{ project.description || 'Sin descripcion' }}</span>
+                    <span class="project-description">{{ project.description || 'Sin descripción' }}</span>
                 </td>
 
-                <td>
+                <td class="project-date">
                     {{ project.startDate }}
                 </td>
 
-                <td>
+                <td class="project-date">
                     {{ project.expectedEndDate }}
                 </td>
 
@@ -88,58 +105,88 @@
                     ></p-tag>
                 </td>
 
-                <td class="project-actions">
-                    <button
-                        pButton
-                        pRipple
-                        type="button"
-                        icon="pi pi-th-large"
-                        class="p-button-rounded p-button-text"
-                        aria-label="Abrir tablero"
-                        pTooltip="Abrir tablero"
-                        tooltipPosition="top"
-                        (click)="openBoard(project)"
-                    ></button>
+                <td class="project-actions-cell">
+                    <div class="project-actions">
+                        <button
+                            pButton
+                            pRipple
+                            type="button"
+                            label="Abrir tablero"
+                            icon="pi pi-th-large"
+                            class="p-button-sm p-button-outlined project-open-button"
+                            aria-label="Abrir tablero"
+                            pTooltip="Abrir tablero"
+                            tooltipPosition="top"
+                            (click)="openBoard(project)"
+                        ></button>
 
-                    <button
-                        pButton
-                        pRipple
-                        type="button"
-                        icon="pi pi-pencil"
-                        class="p-button-rounded p-button-text"
-                        aria-label="Editar"
-                        pTooltip="Editar proyecto"
-                        tooltipPosition="top"
-                        (click)="openEdit(project)"
-                    ></button>
+                        <button
+                            pButton
+                            pRipple
+                            type="button"
+                            icon="pi pi-pencil"
+                            class="p-button-rounded p-button-text p-button-sm project-icon-action"
+                            aria-label="Editar proyecto"
+                            pTooltip="Editar proyecto"
+                            tooltipPosition="top"
+                            (click)="openEdit(project)"
+                        ></button>
 
-                    <button
-                        pButton
-                        pRipple
-                        type="button"
-                        icon="pi pi-trash"
-                        class="p-button-rounded p-button-text p-button-danger"
-                        aria-label="Eliminar"
-                        pTooltip="Eliminar proyecto"
-                        tooltipPosition="top"
-                        (click)="confirmDelete(project)"
-                    ></button>
+                        <button
+                            pButton
+                            pRipple
+                            type="button"
+                            icon="pi pi-trash"
+                            class="p-button-rounded p-button-text p-button-danger p-button-sm project-icon-action"
+                            aria-label="Eliminar proyecto"
+                            pTooltip="Eliminar proyecto"
+                            tooltipPosition="top"
+                            (click)="confirmDelete(project)"
+                        ></button>
+                    </div>
                 </td>
             </tr>
-        </ng-template>
+            </ng-template>
 
-        <ng-template pTemplate="emptymessage">
+            <ng-template pTemplate="emptymessage">
             <tr>
-                <td
-                    colspan="6"
-                    class="text-center py-5"
-                >
-                    No se encontraron proyectos.
+                <td colspan="6">
+                    <div *ngIf="!loading" class="project-empty-state">
+                        <i class="pi pi-folder-open" aria-hidden="true"></i>
+
+                        <ng-container *ngIf="filterControl.value; else noProjects">
+                            <h2>No se encontraron proyectos</h2>
+                            <p>Prueba con otro nombre o limpia la búsqueda actual.</p>
+                            <button
+                                pButton
+                                pRipple
+                                type="button"
+                                label="Limpiar búsqueda"
+                                icon="pi pi-times"
+                                class="p-button-outlined"
+                                (click)="clearSearch()"
+                            ></button>
+                        </ng-container>
+
+                        <ng-template #noProjects>
+                            <h2>Aún no tienes proyectos</h2>
+                            <p>Crea tu primer proyecto para empezar a organizar el trabajo del equipo.</p>
+                            <button
+                                pButton
+                                pRipple
+                                type="button"
+                                label="Crear primer proyecto"
+                                icon="pi pi-plus"
+                                (click)="openCreate()"
+                            ></button>
+                        </ng-template>
+                    </div>
                 </td>
             </tr>
-        </ng-template>
-    </p-table>
-</div>
+            </ng-template>
+        </p-table>
+    </div>
+</section>
 
 <p-dialog
     [(visible)]="dialogVisible"

@@ -1,73 +1,175 @@
 .project-list-page {
-    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
-.project-list-heading {
+.project-page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
 
-    h2 {
+    h1 {
         margin: 0;
-        font-size: 1.5rem;
-        letter-spacing: 0;
+        color: var(--scrum-text);
+        font-size: 1.75rem;
+        letter-spacing: -.02em;
     }
 
-    span {
-        display: block;
-        margin-top: .25rem;
-        color: var(--text-color-secondary);
+    p {
+        margin: .35rem 0 0;
+        color: var(--scrum-text-muted);
+        line-height: 1.5;
     }
 }
 
-:host ::ng-deep .project-list-toolbar {
-    margin-bottom: 1rem;
-    padding: .75rem;
-    border: 1px solid var(--surface-border);
-    border-radius: 8px;
-    background: var(--surface-ground);
+.project-table-card {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
+.project-table-tools {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--scrum-border);
+}
+
+.project-search-field {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+
+    label {
+        color: var(--scrum-text);
+        font-size: .85rem;
+        font-weight: 600;
+    }
+}
+
+.project-search-control {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+
+    > .p-input-icon-left {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    input {
+        width: 24rem;
+        max-width: 100%;
+    }
+}
+
+/* PrimeNG table markup is rendered inside p-table; keep overrides under this component class. */
 :host ::ng-deep .project-table {
     .p-datatable-thead > tr > th {
-        padding-top: .75rem;
-        padding-bottom: .75rem;
-        color: var(--text-color-secondary);
+        padding: .9rem 1rem;
+        background: var(--scrum-surface-muted);
+        color: var(--scrum-text-muted);
+        border-color: var(--scrum-border);
         font-size: .85rem;
+        font-weight: 700;
+        letter-spacing: .02em;
         text-transform: uppercase;
     }
 
     .p-datatable-tbody > tr > td {
-        padding-top: .85rem;
-        padding-bottom: .85rem;
+        padding: 1rem;
+        border-color: var(--scrum-border);
         vertical-align: middle;
+    }
+
+    .p-datatable-tbody > tr {
+        transition: background-color .15s ease;
+
+        &:hover {
+            background: var(--surface-hover);
+        }
+    }
+
+    .p-paginator {
+        justify-content: flex-end;
+        border-width: 1px 0 0;
+        border-color: var(--scrum-border);
+        border-radius: 0;
+    }
+
+    .p-datatable-emptymessage > td {
+        padding: 0;
     }
 }
 
 .project-name {
     font-weight: 700;
-    color: var(--text-color);
+    color: var(--scrum-text);
 }
 
 .project-description {
-    color: var(--text-color-secondary);
+    color: var(--scrum-text-muted);
+    line-height: 1.45;
+}
+
+.project-date-column,
+.project-date {
+    width: 9.5rem;
+    white-space: nowrap;
+}
+
+.project-date {
+    color: var(--scrum-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.project-actions-column,
+.project-actions-cell {
+    width: 17rem;
+    min-width: 17rem;
 }
 
 .project-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: .25rem;
 }
 
-:host ::ng-deep .scrum-dialog {
-    .p-dialog-header {
-        padding-bottom: .75rem;
+.project-icon-action:focus-visible,
+.project-search-clear:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.project-empty-state {
+    min-height: 16rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    color: var(--scrum-text-muted);
+    text-align: center;
+
+    > .pi {
+        margin-bottom: 1rem;
+        color: var(--surface-400);
+        font-size: 2.75rem;
     }
 
-    .p-dialog-content {
-        padding-top: .25rem;
+    h2 {
+        margin: 0;
+        color: var(--scrum-text);
+        font-size: 1.25rem;
+    }
+
+    p {
+        max-width: 30rem;
+        margin: .5rem 0 1.25rem;
+        line-height: 1.5;
     }
 }
 
@@ -91,13 +193,24 @@
 }
 
 @media (max-width: 640px) {
-    .project-list-page {
-        padding: 1rem;
+    .project-page-header {
+        align-items: stretch;
+        flex-direction: column;
+
+        > button {
+            align-self: flex-start;
+        }
     }
 
-    :host ::ng-deep .project-list-toolbar .p-toolbar-group-right,
-    :host ::ng-deep .project-list-toolbar .p-input-icon-left,
-    :host ::ng-deep .project-list-toolbar input {
+    .project-table-tools,
+    .project-search-field,
+    .project-search-control,
+    .project-search-control input {
         width: 100%;
+    }
+
+    /* Paginator is generated inside p-table and needs the scoped deep selector. */
+    :host ::ng-deep .project-table .p-paginator {
+        justify-content: center;
     }
 }

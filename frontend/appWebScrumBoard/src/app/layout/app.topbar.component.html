@@ -1,18 +1,32 @@
-<div class="layout-topbar">
-    <a class="layout-topbar-logo" routerLink="">
-        <img src="assets/layout/images/logo_dark.png" alt="ScrumBoard">
-        <span>ScrumBoard</span>
-    </a>
+<header class="layout-topbar">
+    <div class="layout-topbar-start">
+        <button
+            #menubutton
+            class="p-link layout-menu-button layout-topbar-button"
+            type="button"
+            aria-controls="application-sidebar"
+            aria-label="Abrir o cerrar menú lateral"
+            [attr.aria-expanded]="menuExpanded"
+            title="Abrir o cerrar menú lateral"
+            (click)="layoutService.onMenuToggle()"
+        >
+            <i class="pi pi-bars" aria-hidden="true"></i>
+        </button>
 
-    <button
-        #menubutton
-        class="p-link layout-menu-button layout-topbar-button"
-        type="button"
-        aria-label="Alternar menu"
-        title="Alternar menu"
-        (click)="layoutService.onMenuToggle()"
-    >
-        <i class="pi pi-bars"></i>
-    </button>
+        <a class="layout-topbar-logo" routerLink="/projects" aria-label="Ir a proyectos">
+            <img src="assets/layout/images/logo_dark.png" alt="Logo de ScrumBoard">
+            <span>ScrumBoard</span>
+        </a>
+    </div>
 
-</div>
+    <div *ngIf="currentUser$ | async as user" class="layout-user" [title]="user.email">
+        <div class="layout-user-copy">
+            <span class="layout-user-name">{{ user.name || user.email }}</span>
+            <span *ngIf="user.name" class="layout-user-email">{{ user.email }}</span>
+        </div>
+
+        <span class="layout-user-avatar" aria-hidden="true">
+            {{ getInitials(user) }}
+        </span>
+    </div>
+</header>

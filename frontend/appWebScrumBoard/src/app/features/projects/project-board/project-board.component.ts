@@ -3,7 +3,7 @@ import {TagModule} from "primeng/tag";
 import {Component, inject, OnInit, OnDestroy} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, RouterLink} from "@angular/router";
 import {BoardService} from "../services/board.service";
 import {
     BoardColumn,
@@ -63,7 +63,8 @@ import {ProjectReportFormat, ProjectReportService} from "../services/project-rep
         DropdownModule,
         ConfirmDialogModule,
         TooltipModule,
-        DragDropModule
+        DragDropModule,
+        RouterLink
     ],
     templateUrl: './project-board.component.html',
     styleUrl: './project-board.component.scss'
@@ -474,7 +475,20 @@ export class ProjectBoardComponent implements OnInit, OnDestroy {
             case WorkItemPriority.Critical:
                 return 'danger';
             default:
-                return 'success';
+                return 'warning';
+        }
+    }
+
+    getPriorityClass(priority: WorkItemPriority): string {
+        switch (priority) {
+            case WorkItemPriority.Low:
+                return 'scrum-priority-low';
+            case WorkItemPriority.High:
+                return 'scrum-priority-high';
+            case WorkItemPriority.Critical:
+                return 'scrum-priority-critical';
+            default:
+                return 'scrum-priority-medium';
         }
     }
 
@@ -739,32 +753,14 @@ export class ProjectBoardComponent implements OnInit, OnDestroy {
     ): string {
         switch (state) {
             case 'connected':
-                return 'Tiempo real conectado';
-
-            case 'connecting':
-                return 'Conectando...';
-
-            case 'reconnecting':
-                return 'Reconectando...';
-
-            default:
-                return 'Tiempo real desconectado';
-        }
-    }
-
-    getRealtimeSeverity(
-        state: RealtimeConnectionState
-    ): 'success' | 'warning' | 'danger' | 'info' {
-        switch (state) {
-            case 'connected':
-                return 'success';
+                return 'En tiempo real';
 
             case 'connecting':
             case 'reconnecting':
-                return 'warning';
+                return 'Reconectando';
 
             default:
-                return 'danger';
+                return 'Sin conexión en tiempo real';
         }
     }
 

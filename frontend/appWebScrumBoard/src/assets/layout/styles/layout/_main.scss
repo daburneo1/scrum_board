@@ -9,10 +9,8 @@ html {
 
 body {
     font-family: var(--font-family);
-    color: var(--text-color);
-    background:
-        linear-gradient(180deg, rgba(99, 102, 241, .06), transparent 18rem),
-        var(--surface-ground);
+    color: var(--scrum-text);
+    background: var(--scrum-surface-muted);
     margin: 0;
     padding: 0;
     min-height: 100%;
@@ -30,6 +28,17 @@ a {
 }
 
 :root {
-    --scrum-brand-soft: rgba(99, 102, 241, .08);
-    --scrum-lane-bg: color-mix(in srgb, var(--surface-ground) 82%, var(--surface-card));
+    --scrum-primary: var(--primary-color);
+    --scrum-primary-soft: var(--highlight-bg);
+    --scrum-success: var(--green-500);
+    --scrum-warning: var(--yellow-500);
+    --scrum-danger: var(--red-500);
+    --scrum-surface: var(--surface-card);
+    --scrum-surface-muted: var(--surface-ground);
+    --scrum-border: var(--surface-border);
+    --scrum-text: var(--text-color);
+    --scrum-text-muted: var(--text-color-secondary);
+    --scrum-radius: var(--border-radius);
+    --scrum-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    --scrum-lane-bg: var(--surface-50);
 }

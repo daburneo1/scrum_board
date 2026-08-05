@@ -64,7 +64,7 @@ export class ProjectListComponent
             value: ProjectStatus.Planned
         },
         {
-            label: 'Activo',
+            label: 'En progreso',
             value: ProjectStatus.Active
         },
         {
@@ -307,19 +307,25 @@ export class ProjectListComponent
 
     getStatusSeverity(
         status: ProjectStatus
-    ): 'info' | 'success' | 'warning' | 'danger' {
+    ): 'info' | 'success' | 'warning' | 'danger' | undefined {
         switch (status) {
             case ProjectStatus.Active:
-                return 'success';
+                return undefined;
 
             case ProjectStatus.Completed:
-                return 'info';
+                return 'success';
 
             case ProjectStatus.Cancelled:
                 return 'danger';
 
             default:
-                return 'warning';
+                return 'info';
+        }
+    }
+
+    clearSearch(): void {
+        if (this.filterControl.value) {
+            this.filterControl.setValue('');
         }
     }
 

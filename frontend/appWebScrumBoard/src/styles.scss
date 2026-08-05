@@ -8,21 +8,21 @@ $gutter: 1rem; //for primeflex grid system
 @import "../node_modules/primeflex/primeflex.scss";
 @import "../node_modules/primeicons/primeicons.css";
 
-.presence-indicator {
+.scrum-connection-status {
     display: inline-flex;
     align-items: center;
     gap: .5rem;
-    min-height: 2rem;
-    padding: .25rem .65rem;
-    border: 1px solid var(--surface-border);
+    min-height: 1.75rem;
+    padding: .2rem .55rem;
+    border: 0;
     border-radius: 999px;
-    background: var(--surface-ground);
-    color: var(--text-color-secondary);
-    font-size: .9rem;
+    background: var(--scrum-surface-muted);
+    color: var(--scrum-text-muted);
+    font-size: .78rem;
     font-weight: 600;
 }
 
-.presence-status-dot {
+.scrum-connection-dot {
     width: .55rem;
     height: .55rem;
     flex: 0 0 auto;
@@ -30,25 +30,29 @@ $gutter: 1rem; //for primeflex grid system
     background: var(--text-color-secondary);
 }
 
-.presence-connected .presence-status-dot {
+.scrum-connection-separator {
+    color: var(--surface-400);
+}
+
+.scrum-connection-connected .scrum-connection-dot {
     background: var(--green-500);
 }
 
-.presence-pending .presence-status-dot {
+.scrum-connection-pending .scrum-connection-dot {
     background: var(--yellow-500);
 }
 
-.presence-disconnected .presence-status-dot {
+.scrum-connection-disconnected .scrum-connection-dot {
     background: var(--red-500);
 }
 
-.presence-avatars {
+.scrum-presence-avatars {
     display: inline-flex;
     align-items: center;
     margin-left: .25rem;
 }
 
-.presence-avatar {
+.scrum-presence-avatar {
     width: 1.6rem;
     height: 1.6rem;
     display: inline-flex;
@@ -64,10 +68,340 @@ $gutter: 1rem; //for primeflex grid system
     line-height: 1;
 }
 
-.presence-avatar:first-child {
+.scrum-presence-avatar:first-child {
     margin-left: 0;
 }
 
-.presence-avatar-extra {
+.scrum-presence-avatar-extra {
     background: var(--surface-500);
+}
+
+.scrum-board-back {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    margin-bottom: .85rem;
+    color: var(--scrum-text-muted);
+    border-radius: var(--scrum-radius);
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.scrum-board-back:hover {
+    color: var(--scrum-primary);
+}
+
+.scrum-board-back:focus-visible {
+    outline: 2px solid var(--scrum-primary);
+    outline-offset: .25rem;
+}
+
+.scrum-column-actions {
+    flex: 0 0 auto;
+    padding: .1rem;
+    border: 1px solid var(--scrum-border);
+    border-radius: calc(var(--scrum-radius) + 2px);
+    background: var(--scrum-surface);
+    transition: opacity .15s ease;
+}
+
+.scrum-column-action.p-button {
+    width: 2rem;
+    height: 2rem;
+}
+
+.scrum-column-add-task.p-button {
+    width: 100%;
+    justify-content: center;
+    border: 1px dashed var(--scrum-border);
+    background: transparent;
+    color: var(--scrum-primary);
+    box-shadow: none;
+}
+
+.scrum-column-add-task.p-button:hover {
+    border-color: var(--scrum-primary);
+    background: var(--scrum-primary-soft);
+}
+
+.scrum-column-add-task.p-button:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.scrum-column-empty {
+    min-height: 20rem;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    padding: 1rem;
+    border: 1px dashed var(--scrum-border);
+    border-radius: var(--scrum-radius);
+    color: var(--scrum-text-muted);
+    background: transparent;
+    text-align: center;
+}
+
+.scrum-column-empty > .pi {
+    color: var(--surface-400);
+    font-size: 1.5rem;
+}
+
+.scrum-drag-disabled-message {
+    margin: -.5rem 0 0;
+    color: var(--scrum-text-muted);
+    font-size: .9rem;
+}
+
+.scrum-task-list {
+    min-height: 24rem;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    padding: .15rem;
+    border-radius: var(--scrum-radius);
+    transition: background-color .18s ease, box-shadow .18s ease;
+}
+
+.scrum-task-card {
+    box-sizing: border-box;
+    padding: .9rem;
+    cursor: default;
+    border: 1px solid var(--scrum-border);
+    border-radius: 12px;
+    background: var(--scrum-surface);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.scrum-task-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--surface-300);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, .07);
+}
+
+.scrum-task-card:focus-visible {
+    outline: 2px solid var(--scrum-primary);
+    outline-offset: 2px;
+}
+
+.scrum-task-card-header,
+.scrum-task-footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+}
+
+.scrum-task-title {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.scrum-task-title strong {
+    overflow: hidden;
+    color: var(--scrum-text);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.scrum-task-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: .75rem 0;
+    color: var(--scrum-text-muted);
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+}
+
+.scrum-task-footer {
+    align-items: center;
+}
+
+.scrum-task-assignee {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: var(--scrum-text-muted);
+    font-size: .82rem;
+}
+
+.scrum-task-assignee > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.scrum-assignee-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--scrum-primary-soft);
+    color: var(--scrum-primary);
+    font-size: .75rem;
+}
+
+.scrum-task-actions {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: .1rem;
+}
+
+.scrum-task-edit.p-button {
+    color: var(--scrum-primary);
+}
+
+.scrum-task-edit.p-button:focus-visible,
+.scrum-task-delete.p-button:focus-visible,
+.scrum-drag-handle:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.scrum-drag-handle {
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    border-radius: 50%;
+    color: var(--scrum-text-muted);
+    background: var(--scrum-surface-muted);
+}
+
+.scrum-drag-handle:hover {
+    color: var(--scrum-primary);
+    background: var(--scrum-primary-soft);
+}
+
+.scrum-drag-handle:active {
+    cursor: grabbing;
+}
+
+.scrum-task-list-disabled {
+    cursor: not-allowed;
+}
+
+.scrum-task-card-disabled,
+.scrum-task-card.cdk-drag-disabled {
+    cursor: default;
+    opacity: .78;
+}
+
+.scrum-priority-low.p-tag {
+    background: #e8f1fb;
+    color: #315b7d;
+}
+
+.scrum-priority-medium.p-tag {
+    background: #fff3cd;
+    color: #7a5600;
+}
+
+.scrum-priority-high.p-tag {
+    background: #ffead5;
+    color: #9a4c00;
+}
+
+.scrum-priority-critical.p-tag {
+    background: var(--red-50);
+    color: var(--red-700);
+}
+
+.scrum-task-card.cdk-drag-preview {
+    border-color: var(--scrum-primary);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, .18);
+    opacity: .98;
+    rotate: .35deg;
+    scale: 1.01;
+}
+
+.scrum-task-card.cdk-drag-placeholder {
+    min-height: 7rem;
+    border: 2px dashed var(--scrum-primary);
+    background: var(--scrum-primary-soft);
+    box-shadow: none;
+    opacity: 1;
+}
+
+.scrum-task-card.cdk-drag-placeholder > * {
+    opacity: 0;
+}
+
+.scrum-task-card.cdk-drag-animating,
+.scrum-task-list.cdk-drop-list-dragging .scrum-task-card:not(.cdk-drag-placeholder) {
+    transition: transform 180ms cubic-bezier(0, 0, .2, 1);
+}
+
+.scrum-task-list.cdk-drop-list-dragging {
+    background: var(--scrum-primary-soft);
+    box-shadow: inset 0 0 0 1px var(--highlight-text-color);
+}
+
+/* PrimeNG renders these wrappers internally; styleClass keeps the override scoped. */
+.scrum-dialog .p-dialog-header {
+    padding-bottom: .75rem;
+}
+
+.scrum-dialog .p-dialog-content {
+    padding-top: .25rem;
+}
+
+.scrum-task-dialog .p-dialog-content {
+    overflow-x: hidden;
+}
+
+.scrum-dialog-help {
+    margin: 0 0 1.25rem;
+    color: var(--scrum-text-muted);
+    line-height: 1.45;
+}
+
+.scrum-required {
+    margin-left: .2rem;
+    color: var(--scrum-danger);
+}
+
+@media (hover: hover) {
+    .scrum-column-actions {
+        opacity: .55;
+    }
+
+    .scrum-column:hover .scrum-column-actions,
+    .scrum-column:focus-within .scrum-column-actions {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .scrum-board-filters .p-dropdown {
+        width: 100%;
+    }
+
+    .scrum-board-actions > .p-button {
+        flex: 1 1 10rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .scrum-task-dialog.p-dialog {
+        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
+    }
 }

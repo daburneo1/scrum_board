@@ -1,4 +1,3 @@
-import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
 import { AuthService } from '../core/auth/auth.service';
 
@@ -6,31 +5,11 @@ import { AuthService } from '../core/auth/auth.service';
     selector: 'app-menu',
     templateUrl: './app.menu.component.html'
 })
-export class AppMenuComponent implements OnInit {
-
-    model: any[] = [];
+export class AppMenuComponent {
 
     constructor(private readonly authService: AuthService) { }
 
-    ngOnInit(): void {
-        this.model = [
-            {
-                label: 'ScrumBoard',
-                items: [
-                    {
-                        label: 'Proyectos',
-                        icon: 'pi pi-fw pi-folder',
-                        routerLink: ['/projects']
-                    },
-                    {
-                        label: 'Cerrar sesion',
-                        icon: 'pi pi-fw pi-sign-out',
-                        command: () => {
-                            this.authService.logout();
-                        }
-                    }
-                ]
-            }
-        ];
+    logout(): void {
+        this.authService.logout();
     }
 }

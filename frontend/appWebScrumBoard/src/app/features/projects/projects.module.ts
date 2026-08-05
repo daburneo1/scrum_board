@@ -11,7 +11,6 @@ import {InputTextModule} from "primeng/inputtext";
 import {InputTextareaModule} from "primeng/inputtextarea";
 import {CalendarModule} from "primeng/calendar";
 import {DropdownModule} from "primeng/dropdown";
-import {ToolbarModule} from "primeng/toolbar";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ToastModule} from "primeng/toast";
 import {TagModule} from "primeng/tag";
@@ -35,7 +34,6 @@ import {ProjectListComponent} from "./project-list/project-list.component";
         InputTextareaModule,
         CalendarModule,
         DropdownModule,
-        ToolbarModule,
         ConfirmDialogModule,
         ToastModule,
         TagModule,
