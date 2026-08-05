@@ -4,6 +4,7 @@ ScrumBoard es una aplicación web para gestionar proyectos ágiles mediante tabl
 
 Repositorio: https://github.com/daburneo1/scrum_board
 
+Video demostrativo: https://youtu.be/pcRrvI9VcfU
 ## Stack
 
 | Componente | Tecnología |
