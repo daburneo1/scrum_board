@@ -2,9 +2,9 @@
 
 ScrumBoard es una aplicación web para gestionar proyectos ágiles mediante tableros Kanban configurables. Permite administrar proyectos, columnas y tareas, persistir el orden por arrastre, sincronizar cambios entre sesiones en tiempo real y exportar reportes del proyecto en PDF y Excel.
 
-Repositorio: https://github.com/daburneo1/scrum_board
+- **Repositorio público:** [GitHub](https://github.com/daburneo1/scrum_board)
+- **Video demostrativo:** [YouTube](https://youtu.be/pcRrvI9VcfU)
 
-Video demostrativo: https://youtu.be/pcRrvI9VcfU
 ## Stack
 
 | Componente | Tecnología |
@@ -35,7 +35,7 @@ Video demostrativo: https://youtu.be/pcRrvI9VcfU
 - Actualización optimista con reversión visible si el servidor rechaza el movimiento.
 - Sincronización en tiempo real con SignalR por tablero.
 - Cierre de conexión y suscripciones al destruir el componente del tablero.
-- Reportes PDF y Excel generados desde el mismo DTO y la misma consulta.
+- Reportes PDF y Excel generados desde el mismo DTO; cada solicitud de exportación obtiene los datos mediante una única consulta.
 - Descarga de reportes desde el frontend con nombre de archivo y tipo de contenido.
 - Funcionalidades opcionales: filtros por responsable/prioridad, búsqueda de tareas e indicador de usuarios conectados.
 
@@ -206,7 +206,7 @@ Limitación conocida: la presencia de usuarios está en memoria. Para múltiples
 
 ## Reportes PDF y Excel
 
-Ambos formatos se generan desde `ProjectReportDto` y una única consulta en `ProjectReportRepository`. La exportación aplica Strategy mediante `IProjectReportExporter`.
+Ambos formatos se generan desde `ProjectReportDto`. Cada solicitud de exportación ejecuta una única consulta proyectada mediante `ProjectReportRepository`, y entrega el resultado al exportador correspondiente.
 
 - `QuestPdfProjectReportExporter`: genera PDF.
 - `EpPlusProjectReportExporter`: genera Excel.
@@ -217,10 +217,15 @@ Los reportes incluyen datos del proyecto, fecha de generación, filtros aplicado
 
 ## Pruebas y validación
 
+- Backend: 12 pruebas aprobadas.
+- Frontend: 9 pruebas aprobadas.
+
 Backend:
 
 ```bash
 cd backend/wsScrumBoard
+dotnet restore
+dotnet build
 dotnet test
 ```
 
@@ -228,14 +233,9 @@ Frontend:
 
 ```bash
 cd frontend/appWebScrumBoard
-npm test -- --watch=false --browsers=ChromeHeadless
-```
-
-Build frontend:
-
-```bash
-cd frontend/appWebScrumBoard
+npm ci
 npm run build
+npm test -- --watch=false --browsers=ChromeHeadless
 ```
 
 Las pruebas cubren lógica de aplicación, presencia de usuarios y cálculo de nueva posición de tareas al reordenar.
@@ -245,16 +245,39 @@ Las pruebas cubren lógica de aplicación, presencia de usuarios y cálculo de n
 - Sakai y PrimeNG se usan para acelerar una interfaz consistente sin desarrollar componentes base desde cero.
 - No se incorporó gestor global de estado; servicios con RxJS son suficientes para el alcance.
 - REST y PostgreSQL son la fuente de verdad; SignalR actúa como canal de notificación.
+- Los filtros y la búsqueda se procesan en el servidor y se reutilizan al generar los reportes, evitando diferencias entre la vista del tablero y el archivo exportado.
+- El reordenamiento se deshabilita mientras existen filtros activos, porque la posición visible de una tarea filtrada no necesariamente representa su índice dentro del conjunto completo.
+- La presencia se mantiene en memoria y cuenta usuarios autenticados distintos, no conexiones; varias pestañas del mismo usuario cuentan como una sola presencia.
 
 ## Uso de asistentes de inteligencia artificial
 
-Durante el desarrollo se usaron herramientas de OpenAI como apoyo:
+Durante el desarrollo se utilizaron las siguientes herramientas de OpenAI:
 
-- ChatGPT: planificación, análisis de alternativas, revisión de decisiones y apoyo en documentación.
-- Codex: exploración del código, generación de cambios localizados, pruebas, refactorizaciones y validaciones.
+### ChatGPT
 
-El uso fue asistivo. Las decisiones finales, integración, validación y sustentación técnica son responsabilidad del autor.
+Se utilizó como apoyo para:
 
+- Planificación y distribución del trabajo.
+- Análisis de alternativas arquitectónicas.
+- Revisión de decisiones técnicas.
+- Elaboración de escenarios de prueba.
+- Resolución de dudas de implementación.
+- Preparación de documentación y del README.
+
+### Codex
+
+Se utilizó dentro del entorno de desarrollo para:
+
+- Explorar la estructura de las soluciones.
+- Proponer e implementar cambios localizados.
+- Generar y ajustar código.
+- Crear y revisar pruebas.
+- Detectar errores de compilación.
+- Apoyar refactorizaciones y validaciones técnicas.
+
+El uso de estas herramientas fue asistivo. Todo código incorporado fue revisado, adaptado a la estructura real del proyecto, compilado y validado por el autor.
+
+Las decisiones finales, la integración de los cambios y la sustentación técnica son responsabilidad del autor.
 ## Autor
 
 David Alejandro Burneo Valencia
