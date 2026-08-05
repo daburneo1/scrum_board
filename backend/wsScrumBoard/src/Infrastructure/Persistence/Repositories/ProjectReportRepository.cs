@@ -50,51 +50,48 @@ internal sealed class ProjectReportRepository(ApplicationDbContext dbContext) : 
                         priorityDisplay,
                         searchDisplay,
                         hasActiveFilters),
-                    project.Columns
-                        .SelectMany(column =>
-                            column.Tasks
-                                .Where(task =>
-                                    (!assigneeId.HasValue ||
-                                     task.AssignedUserId == assigneeId.Value) &&
-                                    (!priority.HasValue ||
-                                     task.Priority == priority.Value) &&
-                                    (searchPattern == null ||
-                                     EF.Functions.ILike(
-                                         task.Title,
-                                         searchPattern) ||
-                                     EF.Functions.ILike(
-                                         task.Description ?? string.Empty,
-                                         searchPattern)))
-                                .Select(task =>
-                                    new
-                                    {
-                                        Column = column,
-                                        Task = task
-                                    }))
-                        .OrderBy(item =>
-                            item.Column.SortOrder)
-                        .ThenBy(item =>
-                            item.Task.SortOrder)
-                        .ThenBy(item =>
-                            item.Task.Id)
-                        .Select(item =>
+                    (from task in dbContext.BoardTasks
+                        join column in dbContext.BoardColumns
+                            on task.ColumnId equals column.Id
+                        join assignedUser in dbContext.Users
+                            on task.AssignedUserId equals
+                            (Guid?)assignedUser.Id
+                            into assignedUsers
+                        from assignedUser in
+                            assignedUsers.DefaultIfEmpty()
+                        where
+                            column.ProjectId == project.Id &&
+                            (!assigneeId.HasValue ||
+                             task.AssignedUserId == assigneeId.Value) &&
+                            (!priority.HasValue ||
+                             task.Priority == priority.Value) &&
+                            (searchPattern == null ||
+                             EF.Functions.ILike(
+                                 task.Title,
+                                 searchPattern) ||
+                             EF.Functions.ILike(
+                                 task.Description ?? string.Empty,
+                                 searchPattern))
+                        orderby
+                            column.SortOrder,
+                            task.SortOrder,
+                            task.Id
+                        select
                             new ProjectReportTaskDto(
-                                item.Task.Id,
-                                item.Task.Title,
-                                item.Task.Description,
-                                item.Column.Name,
-                                item.Column.SortOrder,
-                                item.Task.AssignedUser != null
-                                    ? item.Task
-                                        .AssignedUser.Name
+                                task.Id,
+                                task.Title,
+                                task.Description,
+                                column.Name,
+                                column.SortOrder,
+                                assignedUser != null
+                                    ? assignedUser.Name
                                     : null,
-                                item.Task.AssignedUser != null
-                                    ? item.Task
-                                        .AssignedUser.Email
+                                assignedUser != null
+                                    ? assignedUser.Email
                                     : null,
-                                item.Task.Priority,
-                                item.Task.SortOrder,
-                                item.Task.CreatedAtUtc))
+                                task.Priority,
+                                task.SortOrder,
+                                task.CreatedAtUtc))
                         .ToList()))
             .SingleOrDefaultAsync(
                 cancellationToken);
